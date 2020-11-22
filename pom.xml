@@ -43,12 +43,19 @@
     <system>Jira</system>
     <url>https://issues.apache.org/jira/browse/HTTPCORE</url>
   </issueManagement>
+  <distributionManagement>
+    <site>
+      <id>apache.website</id>
+      <url>scm:svn:https://svn.apache.org/repos/asf/httpcomponents/site/${hc.site.path}</url>
+    </site>
+  </distributionManagement>
+
 
   <scm>
     <connection>scm:git:https://gitbox.apache.org/repos/asf/httpcomponents-core.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/httpcomponents-core.git</developerConnection>
     <url>https://github.com/apache/httpcomponents-core/tree/${project.scm.tag}</url>
-    <tag>5.1-beta2-SNAPSHOT</tag>
+    <tag>master</tag>
   </scm>
 
   <modules>
@@ -70,6 +77,8 @@
     <log4j.version>2.8.2</log4j.version>
     <rxjava.version>2.2.8</rxjava.version>
     <api.comparison.version>5.0</api.comparison.version>
+    <hc.site.path>httpcomponents-core-archives/httpcomponents-core-LATEST</hc.site.path>
+    <hc.site.cache>${user.home}/hc-sites</hc.site.cache>
   </properties>
 
   <dependencyManagement>
@@ -110,6 +119,28 @@
   </dependencyManagement>
 
   <build>
+    <pluginManagement>
+    <plugins>
+      <!-- site publishing configuration -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <configuration>
+          <!-- for multi-modules site staging -->
+          <topSiteURL>scm:svn:https://svn.apache.org/repos/asf/httpcomponents/site/${hc.site.path}</topSiteURL>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-scm-publish-plugin</artifactId>
+        <configuration>
+          <checkoutDirectory>${hc.site.cache}/${hc.site.path}</checkoutDirectory>
+          <serverId>apache.releases.https</serverId>
+          <tryUpdate>true</tryUpdate>
+        </configuration>
+      </plugin>
+     </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
