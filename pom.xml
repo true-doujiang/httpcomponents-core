@@ -237,60 +237,60 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <configuration>
-          <encoding>UTF-8</encoding>
-        </configuration>
-        <executions>
-          <execution>
-            <id>validate-main</id>
-            <phase>validate</phase>
-            <configuration>
-              <configLocation>hc-stylecheck/default.xml</configLocation>
-              <headerLocation>hc-stylecheck/asl2.header</headerLocation>
-              <consoleOutput>true</consoleOutput>
-              <failsOnError>true</failsOnError>
-              <linkXRef>false</linkXRef>
-              <sourceDirectory>${basedir}/src/main</sourceDirectory>
-            </configuration>
-            <goals>
-              <goal>checkstyle</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>validate-test</id>
-            <phase>validate</phase>
-            <configuration>
-              <configLocation>hc-stylecheck/default.xml</configLocation>
-              <headerLocation>hc-stylecheck/asl2.header</headerLocation>
-              <consoleOutput>true</consoleOutput>
-              <failsOnError>true</failsOnError>
-              <linkXRef>false</linkXRef>
-              <sourceDirectory>${basedir}/src/test</sourceDirectory>
-            </configuration>
-            <goals>
-              <goal>checkstyle</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>validate-examples</id>
-            <phase>validate</phase>
-            <configuration>
-              <configLocation>hc-stylecheck/minimal.xml</configLocation>
-              <headerLocation>hc-stylecheck/asl2.header</headerLocation>
-              <consoleOutput>true</consoleOutput>
-              <failsOnError>true</failsOnError>
-              <linkXRef>false</linkXRef>
-              <sourceDirectory>${basedir}/src/examples</sourceDirectory>
-            </configuration>
-            <goals>
-              <goal>checkstyle</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+<!--      <plugin>-->
+<!--        <groupId>org.apache.maven.plugins</groupId>-->
+<!--        <artifactId>maven-checkstyle-plugin</artifactId>-->
+<!--        <configuration>-->
+<!--          <encoding>UTF-8</encoding>-->
+<!--        </configuration>-->
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <id>validate-main</id>-->
+<!--            <phase>validate</phase>-->
+<!--            <configuration>-->
+<!--              <configLocation>hc-stylecheck/default.xml</configLocation>-->
+<!--              <headerLocation>hc-stylecheck/asl2.header</headerLocation>-->
+<!--              <consoleOutput>true</consoleOutput>-->
+<!--              <failsOnError>true</failsOnError>-->
+<!--              <linkXRef>false</linkXRef>-->
+<!--              <sourceDirectory>${basedir}/src/main</sourceDirectory>-->
+<!--            </configuration>-->
+<!--            <goals>-->
+<!--              <goal>checkstyle</goal>-->
+<!--            </goals>-->
+<!--          </execution>-->
+<!--          <execution>-->
+<!--            <id>validate-test</id>-->
+<!--            <phase>validate</phase>-->
+<!--            <configuration>-->
+<!--              <configLocation>hc-stylecheck/default.xml</configLocation>-->
+<!--              <headerLocation>hc-stylecheck/asl2.header</headerLocation>-->
+<!--              <consoleOutput>true</consoleOutput>-->
+<!--              <failsOnError>true</failsOnError>-->
+<!--              <linkXRef>false</linkXRef>-->
+<!--              <sourceDirectory>${basedir}/src/test</sourceDirectory>-->
+<!--            </configuration>-->
+<!--            <goals>-->
+<!--              <goal>checkstyle</goal>-->
+<!--            </goals>-->
+<!--          </execution>-->
+<!--          <execution>-->
+<!--            <id>validate-examples</id>-->
+<!--            <phase>validate</phase>-->
+<!--            <configuration>-->
+<!--              <configLocation>hc-stylecheck/minimal.xml</configLocation>-->
+<!--              <headerLocation>hc-stylecheck/asl2.header</headerLocation>-->
+<!--              <consoleOutput>true</consoleOutput>-->
+<!--              <failsOnError>true</failsOnError>-->
+<!--              <linkXRef>false</linkXRef>-->
+<!--              <sourceDirectory>${basedir}/src/examples</sourceDirectory>-->
+<!--            </configuration>-->
+<!--            <goals>-->
+<!--              <goal>checkstyle</goal>-->
+<!--            </goals>-->
+<!--          </execution>-->
+<!--        </executions>-->
+<!--      </plugin>-->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>clirr-maven-plugin</artifactId>
@@ -301,29 +301,29 @@
           </excludes>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>verify</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <excludes>
-            <exclude>**/.externalToolBuilders/**</exclude>			
-            <exclude>**/.pmd</exclude>			
-            <exclude>**/maven-eclipse.xml</exclude>
-            <exclude>**/.checkstyle</exclude>
-            <exclude>src/docbkx/resources/**</exclude>
-            <exclude>src/test/resources/*.truststore</exclude>
-            <exclude>src/test/resources/*.p12</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
+<!--      <plugin>-->
+<!--        <groupId>org.apache.rat</groupId>-->
+<!--        <artifactId>apache-rat-plugin</artifactId>-->
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <phase>verify</phase>-->
+<!--            <goals>-->
+<!--              <goal>check</goal>-->
+<!--            </goals>-->
+<!--          </execution>-->
+<!--        </executions>-->
+<!--        <configuration>-->
+<!--          <excludes>-->
+<!--            <exclude>**/.externalToolBuilders/**</exclude>			-->
+<!--            <exclude>**/.pmd</exclude>			-->
+<!--            <exclude>**/maven-eclipse.xml</exclude>-->
+<!--            <exclude>**/.checkstyle</exclude>-->
+<!--            <exclude>src/docbkx/resources/**</exclude>-->
+<!--            <exclude>src/test/resources/*.truststore</exclude>-->
+<!--            <exclude>src/test/resources/*.p12</exclude>-->
+<!--          </excludes>-->
+<!--        </configuration>-->
+<!--      </plugin>-->
     </plugins>
   </build>
 
