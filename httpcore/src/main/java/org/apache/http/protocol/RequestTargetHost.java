@@ -52,6 +52,9 @@ import org.apache.http.util.Args;
 @Contract(threading = ThreadingBehavior.IMMUTABLE)
 public class RequestTargetHost implements HttpRequestInterceptor {
 
+    /**
+     * Default constructor.
+     */
     public RequestTargetHost() {
         super();
     }

@@ -41,17 +41,25 @@ import org.apache.http.annotation.Contract;
  * Immutable {@link HttpProcessor}.
  *
  * @since 4.1
+ *
+ *
  */
 @Contract(threading = ThreadingBehavior.IMMUTABLE_CONDITIONAL)
 public final class ImmutableHttpProcessor implements HttpProcessor {
 
+    // 请求拦截器
     private final HttpRequestInterceptor[] requestInterceptors;
+    // 响应拦截器
     private final HttpResponseInterceptor[] responseInterceptors;
 
+    /**
+     * construcrot
+     */
     public ImmutableHttpProcessor(
             final HttpRequestInterceptor[] requestInterceptors,
             final HttpResponseInterceptor[] responseInterceptors) {
         super();
+
         if (requestInterceptors != null) {
             final int l = requestInterceptors.length;
             this.requestInterceptors = new HttpRequestInterceptor[l];
@@ -59,6 +67,7 @@ public final class ImmutableHttpProcessor implements HttpProcessor {
         } else {
             this.requestInterceptors = new HttpRequestInterceptor[0];
         }
+
         if (responseInterceptors != null) {
             final int l = responseInterceptors.length;
             this.responseInterceptors = new HttpResponseInterceptor[l];
@@ -70,6 +79,7 @@ public final class ImmutableHttpProcessor implements HttpProcessor {
 
     /**
      * @since 4.3
+     * construcrot
      */
     public ImmutableHttpProcessor(
             final List<HttpRequestInterceptor> requestInterceptors,
@@ -117,14 +127,24 @@ public final class ImmutableHttpProcessor implements HttpProcessor {
         }
     }
 
+    /**
+     * constructor
+     */
     public ImmutableHttpProcessor(final HttpRequestInterceptor... requestInterceptors) {
         this(requestInterceptors, null);
     }
 
+
+    /**
+     * constructor
+     */
     public ImmutableHttpProcessor(final HttpResponseInterceptor... responseInterceptors) {
         this(null, responseInterceptors);
     }
 
+    /**
+     * 请求拦截器链处理
+     */
     @Override
     public void process(
             final HttpRequest request,
@@ -134,6 +154,9 @@ public final class ImmutableHttpProcessor implements HttpProcessor {
         }
     }
 
+    /**
+     * 响应拦截器链处理
+     */
     @Override
     public void process(
             final HttpResponse response,

@@ -50,8 +50,12 @@ public class ConnectionConfig implements Cloneable {
     private final Charset charset;
     private final CodingErrorAction malformedInputAction;
     private final CodingErrorAction unmappableInputAction;
+    //
     private final MessageConstraints messageConstraints;
 
+    /**
+     * default constructor
+     */
     ConnectionConfig(
             final int bufferSize,
             final int fragmentSizeHint,
@@ -125,6 +129,9 @@ public class ConnectionConfig implements Cloneable {
             .setMessageConstraints(config.getMessageConstraints());
     }
 
+    /**
+     *
+     */
     public static class Builder {
 
         private int bufferSize;
@@ -134,6 +141,9 @@ public class ConnectionConfig implements Cloneable {
         private CodingErrorAction unmappableInputAction;
         private MessageConstraints messageConstraints;
 
+        /**
+         * constructor
+         */
         Builder() {
             this.fragmentSizeHint = -1;
         }
@@ -181,10 +191,7 @@ public class ConnectionConfig implements Cloneable {
             }
             final int bufSize = this.bufferSize > 0 ? this.bufferSize : 8 * 1024;
             final int fragmentHintSize  = this.fragmentSizeHint >= 0 ? this.fragmentSizeHint : bufSize;
-            return new ConnectionConfig(
-                    bufSize,
-                    fragmentHintSize,
-                    cs,
+            return new ConnectionConfig(bufSize, fragmentHintSize, cs,
                     malformedInputAction,
                     unmappableInputAction,
                     messageConstraints);

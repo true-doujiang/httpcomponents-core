@@ -43,7 +43,9 @@ import org.apache.http.util.Asserts;
  */
 public class BasicHttpEntity extends AbstractHttpEntity {
 
+    // socket 输入流
     private InputStream content;
+    //
     private long length;
 
     /**

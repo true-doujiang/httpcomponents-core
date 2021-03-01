@@ -60,11 +60,12 @@ public class SessionInputBufferImpl implements SessionInputBuffer, BufferInfo {
 
     private final HttpTransportMetricsImpl metrics;
     private final byte[] buffer;
+    //
     private final ByteArrayBuffer lineBuffer;
     private final int minChunkLimit;
     private final MessageConstraints constraints;
     private final CharsetDecoder decoder;
-
+    //
     private InputStream inStream;
     private int bufferPos;
     private int bufferLen;
@@ -91,8 +92,10 @@ public class SessionInputBufferImpl implements SessionInputBuffer, BufferInfo {
             final int minChunkLimit,
             final MessageConstraints constraints,
             final CharsetDecoder charDecoder) {
+
         Args.notNull(metrics, "HTTP transport metrcis");
         Args.positive(bufferSize, "Buffer size");
+
         this.metrics = metrics;
         this.buffer = new byte[bufferSize];
         this.bufferPos = 0;
@@ -103,6 +106,9 @@ public class SessionInputBufferImpl implements SessionInputBuffer, BufferInfo {
         this.decoder = charDecoder;
     }
 
+    /**
+     * constructor
+     */
     public SessionInputBufferImpl(
             final HttpTransportMetricsImpl metrics,
             final int bufferSize) {

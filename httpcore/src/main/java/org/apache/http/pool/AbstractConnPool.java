@@ -68,10 +68,11 @@ import org.apache.http.util.Asserts;
  */
 @Contract(threading = ThreadingBehavior.SAFE_CONDITIONAL)
 public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
-                                               implements ConnPool<T, E>, ConnPoolControl<T> {
+                                      implements ConnPool<T, E>, ConnPoolControl<T> {
 
     private final Lock lock;
     private final Condition condition;
+    // org.apache.http.impl.conn.PoolingHttpClientConnectionManager.InternalConnectionFactory
     private final ConnFactory<T, C> connFactory;
     private final Map<T, RouteSpecificPool<T, C, E>> routeToPool;
     private final Set<E> leased;
@@ -84,6 +85,9 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
     private volatile int maxTotal;
     private volatile int validateAfterInactivity;
 
+    /**
+     * default constructor
+     */
     public AbstractConnPool(
             final ConnFactory<T, C> connFactory,
             final int defaultMaxPerRoute,
@@ -195,6 +199,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
         Args.notNull(route, "Route");
         Asserts.check(!this.isShutDown, "Connection pool shut down");
 
+        // 匿名内部类
         return new Future<E>() {
 
             private final AtomicBoolean cancelled = new AtomicBoolean(false);

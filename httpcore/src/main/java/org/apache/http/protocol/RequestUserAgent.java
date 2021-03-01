@@ -50,6 +50,9 @@ public class RequestUserAgent implements HttpRequestInterceptor {
 
     private final String userAgent;
 
+    /**
+     * Default constructor.
+     */
     public RequestUserAgent(final String userAgent) {
         super();
         this.userAgent = userAgent;
@@ -67,6 +70,7 @@ public class RequestUserAgent implements HttpRequestInterceptor {
             String s = null;
             final HttpParams params = request.getParams();
             if (params != null) {
+                // Apache-HttpClient/4.5.13-SNAPSHOT (Java/1.8.0_181)
                 s = (String) params.getParameter(CoreProtocolPNames.USER_AGENT);
             }
             if (s == null) {

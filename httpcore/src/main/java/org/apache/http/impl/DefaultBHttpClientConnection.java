@@ -56,10 +56,12 @@ import org.apache.http.util.Args;
  *
  * @since 4.3
  */
-public class DefaultBHttpClientConnection extends BHttpConnectionBase
-                                                   implements HttpClientConnection {
+public class DefaultBHttpClientConnection
+        extends BHttpConnectionBase implements HttpClientConnection {
 
+    //
     private final HttpMessageParser<HttpResponse> responseParser;
+    //
     private final HttpMessageWriter<HttpRequest> requestWriter;
 
     /**
@@ -81,6 +83,8 @@ public class DefaultBHttpClientConnection extends BHttpConnectionBase
      *   {@link DefaultHttpRequestWriterFactory#INSTANCE} will be used.
      * @param responseParserFactory response parser factory. If {@code null}
      *   {@link DefaultHttpResponseParserFactory#INSTANCE} will be used.
+     *
+     * constructor
      */
     public DefaultBHttpClientConnection(
             final int bufferSize,
@@ -92,14 +96,19 @@ public class DefaultBHttpClientConnection extends BHttpConnectionBase
             final ContentLengthStrategy outgoingContentStrategy,
             final HttpMessageWriterFactory<HttpRequest> requestWriterFactory,
             final HttpMessageParserFactory<HttpResponse> responseParserFactory) {
+
         super(bufferSize, fragmentSizeHint, charDecoder, charEncoder,
                 constraints, incomingContentStrategy, outgoingContentStrategy);
+
         this.requestWriter = (requestWriterFactory != null ? requestWriterFactory :
             DefaultHttpRequestWriterFactory.INSTANCE).create(getSessionOutputBuffer());
         this.responseParser = (responseParserFactory != null ? responseParserFactory :
             DefaultHttpResponseParserFactory.INSTANCE).create(getSessionInputBuffer(), constraints);
     }
 
+    /**
+     * constructor
+     */
     public DefaultBHttpClientConnection(
             final int bufferSize,
             final CharsetDecoder charDecoder,
@@ -108,6 +117,10 @@ public class DefaultBHttpClientConnection extends BHttpConnectionBase
         this(bufferSize, bufferSize, charDecoder, charEncoder, constraints, null, null, null, null);
     }
 
+
+    /**
+     * constructor
+     */
     public DefaultBHttpClientConnection(final int bufferSize) {
         this(bufferSize, bufferSize, null, null, null, null, null, null, null);
     }
@@ -133,9 +146,11 @@ public class DefaultBHttpClientConnection extends BHttpConnectionBase
         }
     }
 
+    /**
+     *
+     */
     @Override
-    public void sendRequestHeader(final HttpRequest request)
-            throws HttpException, IOException {
+    public void sendRequestHeader(final HttpRequest request) throws HttpException, IOException {
         Args.notNull(request, "HTTP request");
         ensureOpen();
         this.requestWriter.write(request);
@@ -144,8 +159,7 @@ public class DefaultBHttpClientConnection extends BHttpConnectionBase
     }
 
     @Override
-    public void sendRequestEntity(final HttpEntityEnclosingRequest request)
-            throws HttpException, IOException {
+    public void sendRequestEntity(final HttpEntityEnclosingRequest request) throws HttpException, IOException {
         Args.notNull(request, "HTTP request");
         ensureOpen();
         final HttpEntity entity = request.getEntity();
@@ -157,6 +171,9 @@ public class DefaultBHttpClientConnection extends BHttpConnectionBase
         outStream.close();
     }
 
+    /**
+     *
+     */
     @Override
     public HttpResponse receiveResponseHeader() throws HttpException, IOException {
         ensureOpen();

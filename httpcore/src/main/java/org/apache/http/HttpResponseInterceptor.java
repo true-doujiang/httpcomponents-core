@@ -62,7 +62,6 @@ public interface HttpResponseInterceptor {
      * @throws HttpException in case of an HTTP protocol violation
      * @throws IOException in case of an I/O error
      */
-    void process(HttpResponse response, HttpContext context)
-        throws HttpException, IOException;
+    void process(HttpResponse response, HttpContext context) throws HttpException, IOException;
 
 }

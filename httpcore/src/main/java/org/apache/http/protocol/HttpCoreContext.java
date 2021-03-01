@@ -76,20 +76,30 @@ public class HttpCoreContext implements HttpContext {
         return new HttpCoreContext(new BasicHttpContext());
     }
 
+    /**
+     *
+     */
     public static HttpCoreContext adapt(final HttpContext context) {
         Args.notNull(context, "HTTP context");
         return context instanceof HttpCoreContext
-                        ? (HttpCoreContext) context
-                        : new HttpCoreContext(context);
+                        ? (HttpCoreContext) context : new HttpCoreContext(context);
     }
 
+    // BasicHttpContext
     private final HttpContext context;
 
+
+    /**
+     * constructor
+     */
     public HttpCoreContext(final HttpContext context) {
         super();
         this.context = context;
     }
 
+    /**
+     * default constructor
+     */
     public HttpCoreContext() {
         super();
         this.context = new BasicHttpContext();

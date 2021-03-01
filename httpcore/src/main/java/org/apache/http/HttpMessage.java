@@ -62,8 +62,7 @@ public interface HttpMessage {
     ProtocolVersion getProtocolVersion();
 
     /**
-     * Checks if a certain header is present in this message. Header values are
-     * ignored.
+     * Checks if a certain header is present in this message. Header values are ignored.
      *
      * @param name the header name to check for.
      * @return true if at least one header with this name is present.

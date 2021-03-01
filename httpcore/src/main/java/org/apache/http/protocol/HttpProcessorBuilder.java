@@ -37,26 +37,42 @@ import org.apache.http.HttpResponseInterceptor;
  */
 public class HttpProcessorBuilder {
 
+    //
     private ChainBuilder<HttpRequestInterceptor> requestChainBuilder;
+    //
     private ChainBuilder<HttpResponseInterceptor> responseChainBuilder;
 
+    /**
+     *
+     */
     public static HttpProcessorBuilder create() {
         return new HttpProcessorBuilder();
     }
 
+    /**
+     * default constructor
+     */
     HttpProcessorBuilder() {
         super();
     }
 
+    /**
+     *
+     */
     private ChainBuilder<HttpRequestInterceptor> getRequestChainBuilder() {
         if (requestChainBuilder == null) {
+            // 初始化request拦截器链
             requestChainBuilder = new ChainBuilder<HttpRequestInterceptor>();
         }
         return requestChainBuilder;
     }
 
+    /**
+     *
+     */
     private ChainBuilder<HttpResponseInterceptor> getResponseChainBuilder() {
         if (responseChainBuilder == null) {
+            // 初始化response拦截器链
             responseChainBuilder = new ChainBuilder<HttpResponseInterceptor>();
         }
         return responseChainBuilder;
@@ -142,6 +158,9 @@ public class HttpProcessorBuilder {
         return addAllLast(e);
     }
 
+    /**
+     *
+     */
     public HttpProcessor build() {
         return new ImmutableHttpProcessor(
                 requestChainBuilder != null ? requestChainBuilder.build() : null,

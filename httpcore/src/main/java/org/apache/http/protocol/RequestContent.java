@@ -57,7 +57,8 @@ public class RequestContent implements HttpRequestInterceptor {
     private final boolean overwrite;
 
     /**
-     * Default constructor. The {@code Content-Length} or {@code Transfer-Encoding}
+     * Default constructor.
+     * The {@code Content-Length} or {@code Transfer-Encoding}
      * will cause the interceptor to throw {@link ProtocolException} if already present in the
      * response message.
      */
@@ -84,7 +85,9 @@ public class RequestContent implements HttpRequestInterceptor {
     @Override
     public void process(final HttpRequest request, final HttpContext context)
             throws HttpException, IOException {
+
         Args.notNull(request, "HTTP request");
+        // 只处理entity类型的request
         if (request instanceof HttpEntityEnclosingRequest) {
             if (this.overwrite) {
                 request.removeHeaders(HTTP.TRANSFER_ENCODING);

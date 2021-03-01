@@ -48,8 +48,7 @@ import org.apache.http.HttpResponseInterceptor;
  *
  * @since 4.0
  */
-public interface HttpProcessor
-    extends HttpRequestInterceptor, HttpResponseInterceptor {
+public interface HttpProcessor extends HttpRequestInterceptor, HttpResponseInterceptor {
 
     // no additional methods
 }

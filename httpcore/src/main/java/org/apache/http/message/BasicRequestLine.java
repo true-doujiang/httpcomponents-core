@@ -49,6 +49,9 @@ public class BasicRequestLine implements RequestLine, Cloneable, Serializable {
     private final String method;
     private final String uri;
 
+    /**
+     * constructor
+     */
     public BasicRequestLine(final String method,
                             final String uri,
                             final ProtocolVersion version) {

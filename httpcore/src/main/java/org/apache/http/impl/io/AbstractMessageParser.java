@@ -64,6 +64,7 @@ public abstract class AbstractMessageParser<T extends HttpMessage> implements Ht
     private final List<CharArrayBuffer> headerLines;
     protected final LineParser lineParser;
 
+    //
     private int state;
     private T message;
 
@@ -250,12 +251,16 @@ public abstract class AbstractMessageParser<T extends HttpMessage> implements Ht
     protected abstract T parseHead(SessionInputBuffer sessionBuffer)
         throws IOException, HttpException, ParseException;
 
+    /**
+     *
+     */
     @Override
     public T parse() throws IOException, HttpException {
         final int st = this.state;
         switch (st) {
         case HEAD_LINE:
             try {
+                //
                 this.message = parseHead(this.sessionBuffer);
             } catch (final ParseException px) {
                 throw new ProtocolException(px.getMessage(), px);

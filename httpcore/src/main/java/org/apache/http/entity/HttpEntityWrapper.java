@@ -85,14 +85,12 @@ public class HttpEntityWrapper implements HttpEntity {
     }
 
     @Override
-    public InputStream getContent()
-        throws IOException {
+    public InputStream getContent() throws IOException {
         return wrappedEntity.getContent();
     }
 
     @Override
-    public void writeTo(final OutputStream outStream)
-        throws IOException {
+    public void writeTo(final OutputStream outStream) throws IOException {
         wrappedEntity.writeTo(outStream);
     }
 

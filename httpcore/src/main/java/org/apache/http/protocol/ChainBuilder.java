@@ -45,6 +45,9 @@ final class ChainBuilder<E> {
     private final LinkedList<E> list;
     private final Map<Class<?>, E> uniqueClasses;
 
+    /**
+     * default constructor
+     */
     public ChainBuilder() {
         this.list = new LinkedList<E>();
         this.uniqueClasses = new HashMap<Class<?>, E>();

@@ -43,6 +43,7 @@ public class BasicHttpRequest extends AbstractHttpMessage implements HttpRequest
     private final String method;
     private final String uri;
 
+    // 请求行
     private RequestLine requestline;
 
     /**

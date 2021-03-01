@@ -36,6 +36,9 @@ import java.net.InetAddress;
  */
 public interface HttpInetConnection extends HttpConnection {
 
+    // 都是get方法
+
+
     InetAddress getLocalAddress();
 
     int getLocalPort();

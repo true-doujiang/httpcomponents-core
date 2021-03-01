@@ -42,6 +42,7 @@ import org.apache.http.util.Args;
 @SuppressWarnings("deprecation")
 public abstract class AbstractHttpMessage implements HttpMessage {
 
+    // http请求头 请求拦截器链会添加请求头
     protected HeaderGroup headergroup;
 
     /**

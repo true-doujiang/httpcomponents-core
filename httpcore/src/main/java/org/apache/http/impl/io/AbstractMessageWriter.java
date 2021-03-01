@@ -50,8 +50,10 @@ import org.apache.http.util.CharArrayBuffer;
 @SuppressWarnings("deprecation")
 public abstract class AbstractMessageWriter<T extends HttpMessage> implements HttpMessageWriter<T> {
 
+    //
     protected final SessionOutputBuffer sessionBuffer;
     protected final CharArrayBuffer lineBuf;
+    //
     protected final LineFormatter lineFormatter;
 
     /**
@@ -108,8 +110,7 @@ public abstract class AbstractMessageWriter<T extends HttpMessage> implements Ht
         writeHeadLine(message);
         for (final HeaderIterator it = message.headerIterator(); it.hasNext(); ) {
             final Header header = it.nextHeader();
-            this.sessionBuffer.writeLine
-                (lineFormatter.formatHeader(this.lineBuf, header));
+            this.sessionBuffer.writeLine(lineFormatter.formatHeader(this.lineBuf, header));
         }
         this.lineBuf.clear();
         this.sessionBuffer.writeLine(this.lineBuf);

@@ -48,10 +48,16 @@ public class BasicHttpContext implements HttpContext {
     private final HttpContext parentContext;
     private final Map<String, Object> map;
 
+    /**
+     * default constructor
+     */
     public BasicHttpContext() {
         this(null);
     }
 
+    /**
+     * constructor
+     */
     public BasicHttpContext(final HttpContext parentContext) {
         super();
         this.map = new ConcurrentHashMap<String, Object>();
@@ -62,9 +68,11 @@ public class BasicHttpContext implements HttpContext {
     public Object getAttribute(final String id) {
         Args.notNull(id, "Id");
         Object obj = this.map.get(id);
+
         if (obj == null && this.parentContext != null) {
             obj = this.parentContext.getAttribute(id);
         }
+
         return obj;
     }
 

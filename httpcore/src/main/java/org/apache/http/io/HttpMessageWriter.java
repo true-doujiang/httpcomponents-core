@@ -48,7 +48,6 @@ public interface HttpMessageWriter<T extends HttpMessage> {
      * @throws IOException in case of an I/O error
      * @throws HttpException in case of HTTP protocol violation
      */
-    void write(T message)
-        throws IOException, HttpException;
+    void write(T message) throws IOException, HttpException;
 
 }

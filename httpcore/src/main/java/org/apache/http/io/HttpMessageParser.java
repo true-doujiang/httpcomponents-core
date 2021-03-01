@@ -50,7 +50,6 @@ public interface HttpMessageParser<T extends HttpMessage> {
      * @throws IOException in case of an I/O error
      * @throws HttpException in case of HTTP protocol violation
      */
-    T parse()
-        throws IOException, HttpException;
+    T parse() throws IOException, HttpException;
 
 }

@@ -47,26 +47,27 @@ public interface HttpClientConnection extends HttpConnection {
      *         even after waiting for {@code timeout} milliseconds.
      * @throws IOException if an error happens on the connection
      */
-    boolean isResponseAvailable(int timeout)
-        throws IOException;
+    boolean isResponseAvailable(int timeout) throws IOException;
 
     /**
      * Sends the request line and all headers over the connection.
      * @param request the request whose headers to send.
      * @throws HttpException in case of HTTP protocol violation
      * @throws IOException in case of an I/O error
+     *
+     * 发送普通http request
      */
-    void sendRequestHeader(HttpRequest request)
-        throws HttpException, IOException;
+    void sendRequestHeader(HttpRequest request) throws HttpException, IOException;
 
     /**
      * Sends the request entity over the connection.
      * @param request the request whose entity to send.
      * @throws HttpException in case of HTTP protocol violation
      * @throws IOException in case of an I/O error
+     *
+     * 发送普通 entity http request
      */
-    void sendRequestEntity(HttpEntityEnclosingRequest request)
-        throws HttpException, IOException;
+    void sendRequestEntity(HttpEntityEnclosingRequest request) throws HttpException, IOException;
 
     /**
      * Receives the request line and headers of the next response available from
@@ -77,9 +78,10 @@ public interface HttpClientConnection extends HttpConnection {
      *         initialized.
      * @throws HttpException in case of HTTP protocol violation
      * @throws IOException in case of an I/O error
+     *
+     *
      */
-    HttpResponse receiveResponseHeader()
-        throws HttpException, IOException;
+    HttpResponse receiveResponseHeader() throws HttpException, IOException;
 
     /**
      * Receives the next response entity available from this connection and
@@ -88,9 +90,10 @@ public interface HttpClientConnection extends HttpConnection {
      * @param response the response to attach the entity to
      * @throws HttpException in case of HTTP protocol violation
      * @throws IOException in case of an I/O error
+     *
+     *
      */
-    void receiveResponseEntity(HttpResponse response)
-        throws HttpException, IOException;
+    void receiveResponseEntity(HttpResponse response) throws HttpException, IOException;
 
     /**
      * Writes out all pending buffered data over the open connection.

@@ -49,6 +49,9 @@ public class PoolStats implements Serializable {
     private final int available;
     private final int max;
 
+    /**
+     * default constructor
+     */
     public PoolStats(final int leased, final int pending, final int free, final int max) {
         super();
         this.leased = leased;

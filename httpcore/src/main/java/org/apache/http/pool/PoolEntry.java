@@ -53,6 +53,7 @@ public abstract class PoolEntry<T, C> {
 
     private final String id;
     private final T route;
+    // LoggingManagedHttpClientConnection
     private final C conn;
     private final long created;
     private final long validityDeadline;

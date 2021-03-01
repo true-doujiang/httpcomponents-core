@@ -28,7 +28,7 @@
 package org.apache.http.protocol;
 
 import java.io.IOException;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpClientConnection;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
@@ -58,6 +58,7 @@ import org.apache.http.util.Args;
 @Contract(threading = ThreadingBehavior.IMMUTABLE)
 public class HttpRequestExecutor {
 
+
     public static final int DEFAULT_WAIT_FOR_CONTINUE = 3000;
 
     private final int waitForContinue;
@@ -72,6 +73,9 @@ public class HttpRequestExecutor {
         this.waitForContinue = Args.positive(waitForContinue, "Wait for continue time");
     }
 
+    /**
+     * default constructor
+     */
     public HttpRequestExecutor() {
         this(DEFAULT_WAIT_FOR_CONTINUE);
     }
@@ -109,8 +113,9 @@ public class HttpRequestExecutor {
      * @return  the response to the request.
      *
      * @throws IOException in case of an I/O error.
-     * @throws HttpException in case of HTTP protocol violation or a processing
-     *   problem.
+     * @throws HttpException in case of HTTP protocol violation or a processing  problem.
+     *
+     * client模块调用
      */
     public HttpResponse execute(
             final HttpRequest request,
@@ -121,8 +126,11 @@ public class HttpRequestExecutor {
         Args.notNull(context, "HTTP context");
         try {
             HttpResponse response = doSendRequest(request, conn, context);
+            System.out.println("HttpRequestExecutor execute.response = " + response);
             if (response == null) {
                 response = doReceiveResponse(request, conn, context);
+
+                System.out.println("HttpRequestExecutor execute.response2 = " + response);
             }
             return response;
         } catch (final IOException ex) {
@@ -193,6 +201,7 @@ public class HttpRequestExecutor {
             final HttpRequest request,
             final HttpClientConnection conn,
             final HttpContext context) throws IOException, HttpException {
+
         Args.notNull(request, "HTTP request");
         Args.notNull(conn, "Client connection");
         Args.notNull(context, "HTTP context");
@@ -201,8 +210,9 @@ public class HttpRequestExecutor {
 
         context.setAttribute(HttpCoreContext.HTTP_CONNECTION, conn);
         context.setAttribute(HttpCoreContext.HTTP_REQ_SENT, Boolean.FALSE);
-
+        // CPoolProxy
         conn.sendRequestHeader(request);
+
         if (request instanceof HttpEntityEnclosingRequest) {
             // Check for expect-continue handshake. We have to flush the
             // headers and wait for an 100-continue response to handle it.
@@ -224,8 +234,7 @@ public class HttpRequestExecutor {
                     final int status = response.getStatusLine().getStatusCode();
                     if (status < 200) {
                         if (status != HttpStatus.SC_CONTINUE) {
-                            throw new ProtocolException(
-                                    "Unexpected response: " + response.getStatusLine());
+                            throw new ProtocolException("Unexpected response: " + response.getStatusLine());
                         }
                         // discard 100-continue
                         response = null;
@@ -238,7 +247,9 @@ public class HttpRequestExecutor {
                 conn.sendRequestEntity((HttpEntityEnclosingRequest) request);
             }
         }
+
         conn.flush();
+        // 标记http request已经发送
         context.setAttribute(HttpCoreContext.HTTP_REQ_SENT, Boolean.TRUE);
         return response;
     }
@@ -269,12 +280,15 @@ public class HttpRequestExecutor {
         int statusCode = 0;
 
         while (response == null || statusCode < HttpStatus.SC_OK) {
-
+            // CPoolProxy
             response = conn.receiveResponseHeader();
+
             statusCode = response.getStatusLine().getStatusCode();
+
             if (statusCode < HttpStatus.SC_CONTINUE) {
                 throw new ProtocolException("Invalid response: " + response.getStatusLine());
             }
+
             if (canResponseHaveBody(request, response)) {
                 conn.receiveResponseEntity(response);
             }

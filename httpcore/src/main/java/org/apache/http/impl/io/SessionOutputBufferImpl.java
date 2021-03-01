@@ -58,6 +58,7 @@ public class SessionOutputBufferImpl implements SessionOutputBuffer, BufferInfo 
     private static final byte[] CRLF = new byte[] {HTTP.CR, HTTP.LF};
 
     private final HttpTransportMetricsImpl metrics;
+    //
     private final ByteArrayBuffer buffer;
     private final int fragementSizeHint;
     private final CharsetEncoder encoder;
@@ -90,6 +91,9 @@ public class SessionOutputBufferImpl implements SessionOutputBuffer, BufferInfo 
         this.encoder = charEncoder;
     }
 
+    /**
+     * constructor
+     */
     public SessionOutputBufferImpl(
             final HttpTransportMetricsImpl metrics,
             final int bufferSize) {

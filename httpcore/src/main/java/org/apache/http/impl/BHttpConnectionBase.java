@@ -75,12 +75,16 @@ import org.apache.http.util.NetUtils;
  */
 public class BHttpConnectionBase implements HttpInetConnection {
 
+    //
     private final SessionInputBufferImpl inBuffer;
+    //
     private final SessionOutputBufferImpl outbuffer;
+
     private final MessageConstraints messageConstraints;
     private final HttpConnectionMetricsImpl connMetrics;
     private final ContentLengthStrategy incomingContentStrategy;
     private final ContentLengthStrategy outgoingContentStrategy;
+    //
     private final AtomicReference<Socket> socketHolder;
 
     /**
@@ -98,6 +102,8 @@ public class BHttpConnectionBase implements HttpInetConnection {
      *   {@link LaxContentLengthStrategy#INSTANCE} will be used.
      * @param outgoingContentStrategy outgoing content length strategy. If {@code null}
      *   {@link StrictContentLengthStrategy#INSTANCE} will be used.
+     *
+     * constructor
      */
     protected BHttpConnectionBase(
             final int bufferSize,
@@ -108,22 +114,30 @@ public class BHttpConnectionBase implements HttpInetConnection {
             final ContentLengthStrategy incomingContentStrategy,
             final ContentLengthStrategy outgoingContentStrategy) {
         super();
+
         Args.positive(bufferSize, "Buffer size");
+
         final HttpTransportMetricsImpl inTransportMetrics = new HttpTransportMetricsImpl();
         final HttpTransportMetricsImpl outTransportMetrics = new HttpTransportMetricsImpl();
-        this.inBuffer = new SessionInputBufferImpl(inTransportMetrics, bufferSize, -1,
-                messageConstraints != null ? messageConstraints : MessageConstraints.DEFAULT, charDecoder);
-        this.outbuffer = new SessionOutputBufferImpl(outTransportMetrics, bufferSize, fragmentSizeHint,
-                charEncoder);
+        MessageConstraints messageConstraints1 = messageConstraints != null ? messageConstraints : MessageConstraints.DEFAULT;
+
+        this.inBuffer = new SessionInputBufferImpl(inTransportMetrics, bufferSize, -1, messageConstraints1, charDecoder);
+
+        this.outbuffer = new SessionOutputBufferImpl(outTransportMetrics, bufferSize, fragmentSizeHint, charEncoder);
+
         this.messageConstraints = messageConstraints;
         this.connMetrics = new HttpConnectionMetricsImpl(inTransportMetrics, outTransportMetrics);
         this.incomingContentStrategy = incomingContentStrategy != null ? incomingContentStrategy :
             LaxContentLengthStrategy.INSTANCE;
         this.outgoingContentStrategy = outgoingContentStrategy != null ? outgoingContentStrategy :
             StrictContentLengthStrategy.INSTANCE;
+        //
         this.socketHolder = new AtomicReference<Socket>();
     }
 
+    /**
+     *
+     */
     protected void ensureOpen() throws IOException {
         final Socket socket = this.socketHolder.get();
         if (socket == null) {
@@ -186,6 +200,7 @@ public class BHttpConnectionBase implements HttpInetConnection {
     protected OutputStream createOutputStream(
             final long len,
             final SessionOutputBuffer outbuffer) {
+
         if (len == ContentLengthStrategy.CHUNKED) {
             return new ChunkedOutputStream(2048, outbuffer);
         } else if (len == ContentLengthStrategy.IDENTITY) {
@@ -203,6 +218,7 @@ public class BHttpConnectionBase implements HttpInetConnection {
     protected InputStream createInputStream(
             final long len,
             final SessionInputBuffer inBuffer) {
+
         if (len == ContentLengthStrategy.CHUNKED) {
             return new ChunkedInputStream(inBuffer, this.messageConstraints);
         } else if (len == ContentLengthStrategy.IDENTITY) {
