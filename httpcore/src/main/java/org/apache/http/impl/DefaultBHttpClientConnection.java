@@ -45,10 +45,7 @@ import org.apache.http.config.MessageConstraints;
 import org.apache.http.entity.ContentLengthStrategy;
 import org.apache.http.impl.io.DefaultHttpRequestWriterFactory;
 import org.apache.http.impl.io.DefaultHttpResponseParserFactory;
-import org.apache.http.io.HttpMessageParser;
-import org.apache.http.io.HttpMessageParserFactory;
-import org.apache.http.io.HttpMessageWriter;
-import org.apache.http.io.HttpMessageWriterFactory;
+import org.apache.http.io.*;
 import org.apache.http.util.Args;
 
 /**
@@ -100,10 +97,13 @@ public class DefaultBHttpClientConnection
         super(bufferSize, fragmentSizeHint, charDecoder, charEncoder,
                 constraints, incomingContentStrategy, outgoingContentStrategy);
 
+        SessionOutputBuffer outputBuffer = getSessionOutputBuffer();
         this.requestWriter = (requestWriterFactory != null ? requestWriterFactory :
-            DefaultHttpRequestWriterFactory.INSTANCE).create(getSessionOutputBuffer());
+            DefaultHttpRequestWriterFactory.INSTANCE).create(outputBuffer);
+
+        SessionInputBuffer inputBuffer = getSessionInputBuffer();
         this.responseParser = (responseParserFactory != null ? responseParserFactory :
-            DefaultHttpResponseParserFactory.INSTANCE).create(getSessionInputBuffer(), constraints);
+            DefaultHttpResponseParserFactory.INSTANCE).create(inputBuffer, constraints);
     }
 
     /**

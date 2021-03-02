@@ -45,6 +45,9 @@ import org.apache.http.pool.PoolEntry;
 @Contract(threading = ThreadingBehavior.SAFE_CONDITIONAL)
 public class BasicPoolEntry extends PoolEntry<HttpHost, HttpClientConnection> {
 
+    /**
+     * default constructor
+     */
     public BasicPoolEntry(final String id, final HttpHost route, final HttpClientConnection conn) {
         super(id, route, conn);
     }

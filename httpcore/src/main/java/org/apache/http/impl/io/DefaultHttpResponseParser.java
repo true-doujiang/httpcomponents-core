@@ -120,10 +120,12 @@ public class DefaultHttpResponseParser extends AbstractMessageParser<HttpRespons
         this(buffer, null, null, MessageConstraints.DEFAULT);
     }
 
+    /**
+     * AbstractMessageParser 中 定义
+     */
     @Override
-    protected HttpResponse parseHead(
-            final SessionInputBuffer sessionBuffer)
-        throws IOException, HttpException, ParseException {
+    protected HttpResponse parseHead(final SessionInputBuffer sessionBuffer)
+            throws IOException, HttpException, ParseException {
 
         this.lineBuf.clear();
         final int readLen = sessionBuffer.readLine(this.lineBuf);

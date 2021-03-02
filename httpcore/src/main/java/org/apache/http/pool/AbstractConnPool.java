@@ -74,10 +74,12 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
     private final Condition condition;
     // org.apache.http.impl.conn.PoolingHttpClientConnectionManager.InternalConnectionFactory
     private final ConnFactory<T, C> connFactory;
+    //
     private final Map<T, RouteSpecificPool<T, C, E>> routeToPool;
     private final Set<E> leased;
     private final LinkedList<E> available;
     private final LinkedList<Future<E>> pending;
+    //
     private final Map<T, Integer> maxPerRoute;
 
     private volatile boolean isShutDown;
@@ -87,6 +89,8 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
 
     /**
      * default constructor
+     *
+     * PoolingHttpClientConnectionManager->CPool->本类
      */
     public AbstractConnPool(
             final ConnFactory<T, C> connFactory,
@@ -98,10 +102,12 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
         this.maxTotal = Args.positive(maxTotal, "Max total value");
         this.lock = new ReentrantLock();
         this.condition = this.lock.newCondition();
+        //
         this.routeToPool = new HashMap<T, RouteSpecificPool<T, C, E>>();
         this.leased = new HashSet<E>();
         this.available = new LinkedList<E>();
         this.pending = new LinkedList<Future<E>>();
+        //
         this.maxPerRoute = new HashMap<T, Integer>();
     }
 
@@ -166,19 +172,26 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
         }
     }
 
+    /**
+     *
+     */
     private RouteSpecificPool<T, C, E> getPool(final T route) {
+        //
         RouteSpecificPool<T, C, E> pool = this.routeToPool.get(route);
         if (pool == null) {
+            // 匿名内部类
             pool = new RouteSpecificPool<T, C, E>(route) {
-
                 @Override
                 protected E createEntry(final C conn) {
-                    return AbstractConnPool.this.createEntry(route, conn);
+                    //
+                    E entry = AbstractConnPool.this.createEntry(route, conn);
+                    return entry;
                 }
-
             };
+            // 缓存起来
             this.routeToPool.put(route, pool);
         }
+
         return pool;
     }
 
@@ -193,6 +206,10 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
      * {@link Thread}s. Therefore, one <b>must</b> call {@link Future#get()}
      * or {@link Future#get(long, TimeUnit)} method on the {@link Future}
      * returned by this method in order for the lease operation to complete.
+     *
+     * org.apache.http.impl.conn.PoolingHttpClientConnectionManager#requestConnection() 调用
+     *
+     * 返回匿名内部类
      */
     @Override
     public Future<E> lease(final T route, final Object state, final FutureCallback<E> callback) {
@@ -200,7 +217,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
         Asserts.check(!this.isShutDown, "Connection pool shut down");
 
         // 匿名内部类
-        return new Future<E>() {
+        Future<E> future = new Future<E>() {
 
             private final AtomicBoolean cancelled = new AtomicBoolean(false);
             private final AtomicBoolean done = new AtomicBoolean(false);
@@ -243,20 +260,31 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                 }
             }
 
+            /**
+             *
+             * @param timeout
+             * @param timeUnit
+             */
             @Override
-            public E get(final long timeout, final TimeUnit timeUnit) throws InterruptedException, ExecutionException, TimeoutException {
-                for (;;) {
+            public E get(final long timeout, final TimeUnit timeUnit)
+                    throws InterruptedException, ExecutionException, TimeoutException {
+
+                for (; ; ) {
                     synchronized (this) {
                         try {
                             final E entry = entryRef.get();
                             if (entry != null) {
                                 return entry;
                             }
+
                             if (done.get()) {
                                 throw new ExecutionException(operationAborted());
                             }
+
+                            // 外部类方法
                             final E leasedEntry = getPoolEntryBlocking(route, state, timeout, timeUnit, this);
-                            if (validateAfterInactivity > 0)  {
+
+                            if (validateAfterInactivity > 0) {
                                 if (leasedEntry.getUpdated() + validateAfterInactivity <= System.currentTimeMillis()) {
                                     if (!validate(leasedEntry)) {
                                         leasedEntry.close();
@@ -265,6 +293,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                                     }
                                 }
                             }
+
                             if (done.compareAndSet(false, true)) {
                                 entryRef.set(leasedEntry);
                                 done.set(true);
@@ -272,6 +301,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                                 if (callback != null) {
                                     callback.completed(leasedEntry);
                                 }
+
                                 return leasedEntry;
                             } else {
                                 release(leasedEntry, true);
@@ -288,8 +318,11 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                     }
                 }
             }
-
         };
+
+        System.out.println("future = " + future);
+
+        return future;
     }
 
     /**
@@ -312,6 +345,9 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
         return lease(route, state, null);
     }
 
+    /**
+     *
+     */
     private E getPoolEntryBlocking(
             final T route, final Object state,
             final long timeout, final TimeUnit timeUnit,
@@ -321,6 +357,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
         if (timeout > 0) {
             deadline = new Date (System.currentTimeMillis() + timeUnit.toMillis(timeout));
         }
+        // 并发锁
         this.lock.lock();
         try {
             E entry;
@@ -329,6 +366,8 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                 if (future.isCancelled()) {
                     throw new ExecutionException(operationAborted());
                 }
+
+                //
                 final RouteSpecificPool<T, C, E> pool = getPool(route);
                 for (;;) {
                     entry = pool.getFree(state);
@@ -381,7 +420,10 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                                 otherpool.remove(lastUsed);
                             }
                         }
+
+                        // 创建 LoggingManagedHttpClientConnection
                         final C conn = this.connFactory.create(route);
+                        // 添加到entity中
                         entry = pool.add(conn);
                         this.leased.add(entry);
                         return entry;

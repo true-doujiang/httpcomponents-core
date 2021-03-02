@@ -85,6 +85,9 @@ public abstract class AbstractMessageWriter<T extends HttpMessage> implements Ht
      *   will be used.
      *
      * @since 4.3
+     *
+     *
+     * constructor
      */
     public AbstractMessageWriter(
             final SessionOutputBuffer buffer,
@@ -101,6 +104,8 @@ public abstract class AbstractMessageWriter<T extends HttpMessage> implements Ht
      *
      * @param message the message whose first line is to be written out.
      * @throws IOException in case of an I/O error.
+     *
+     * 子类实现
      */
     protected abstract void writeHeadLine(T message) throws IOException;
 

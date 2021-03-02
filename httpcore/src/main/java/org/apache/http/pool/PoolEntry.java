@@ -76,12 +76,16 @@ public abstract class PoolEntry<T, C> {
      */
     public PoolEntry(final String id, final T route, final C conn,
             final long timeToLive, final TimeUnit timeUnit) {
+
         super();
+
         Args.notNull(route, "Route");
         Args.notNull(conn, "Connection");
         Args.notNull(timeUnit, "Time unit");
+
         this.id = id;
         this.route = route;
+        //
         this.conn = conn;
         this.created = System.currentTimeMillis();
         this.updated = this.created;

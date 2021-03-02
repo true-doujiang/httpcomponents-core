@@ -58,6 +58,10 @@ public class DefaultHttpResponseWriter extends AbstractMessageWriter<HttpRespons
         super(buffer, null);
     }
 
+    /**
+     *
+     * AbstractMessageWriter 定义
+     */
     @Override
     protected void writeHeadLine(final HttpResponse message) throws IOException {
         lineFormatter.formatStatusLine(this.lineBuf, message.getStatusLine());

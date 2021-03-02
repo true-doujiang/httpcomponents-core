@@ -59,6 +59,7 @@ public abstract class AbstractMessageParser<T extends HttpMessage> implements Ht
     private static final int HEAD_LINE    = 0;
     private static final int HEADERS      = 1;
 
+    //
     private final SessionInputBuffer sessionBuffer;
     private final MessageConstraints messageConstraints;
     private final List<CharArrayBuffer> headerLines;
@@ -140,7 +141,9 @@ public abstract class AbstractMessageParser<T extends HttpMessage> implements Ht
             final int maxHeaderCount,
             final int maxLineLen,
             final LineParser parser) throws HttpException, IOException {
+
         final List<CharArrayBuffer> headerLines = new ArrayList<CharArrayBuffer>();
+
         return parseHeaders(inBuffer, maxHeaderCount, maxLineLen,
                 parser != null ? parser : BasicLineParser.INSTANCE,
                 headerLines);
@@ -247,9 +250,10 @@ public abstract class AbstractMessageParser<T extends HttpMessage> implements Ht
      * @throws IOException in case of an I/O error.
      * @throws HttpException in case of HTTP protocol violation.
      * @throws ParseException in case of a parse error.
+     *
+     * 子类实现
      */
-    protected abstract T parseHead(SessionInputBuffer sessionBuffer)
-        throws IOException, HttpException, ParseException;
+    protected abstract T parseHead(SessionInputBuffer sessionBuffer) throws IOException, HttpException, ParseException;
 
     /**
      *

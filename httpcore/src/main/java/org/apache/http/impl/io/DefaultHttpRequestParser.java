@@ -98,9 +98,10 @@ public class DefaultHttpRequestParser extends AbstractMessageParser<HttpRequest>
             final LineParser lineParser,
             final HttpRequestFactory requestFactory,
             final MessageConstraints constraints) {
+
         super(buffer, lineParser, constraints);
-        this.requestFactory = requestFactory != null ? requestFactory :
-            DefaultHttpRequestFactory.INSTANCE;
+
+        this.requestFactory = requestFactory != null ? requestFactory : DefaultHttpRequestFactory.INSTANCE;
         this.lineBuf = new CharArrayBuffer(128);
     }
 
@@ -120,9 +121,11 @@ public class DefaultHttpRequestParser extends AbstractMessageParser<HttpRequest>
         this(buffer, null, null, MessageConstraints.DEFAULT);
     }
 
+    /**
+     * AbstractMessageParser 中 定义
+     */
     @Override
-    protected HttpRequest parseHead(
-            final SessionInputBuffer sessionBuffer)
+    protected HttpRequest parseHead(final SessionInputBuffer sessionBuffer)
         throws IOException, HttpException, ParseException {
 
         this.lineBuf.clear();

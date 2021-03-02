@@ -47,6 +47,8 @@ public class DefaultHttpRequestWriter extends AbstractMessageWriter<HttpRequest>
      * @param formatter the line formatter If {@code null}
      *   {@link org.apache.http.message.BasicLineFormatter#INSTANCE}
      *   will be used.
+     *
+     * constructor
      */
     public DefaultHttpRequestWriter(
             final SessionOutputBuffer buffer,

@@ -52,8 +52,13 @@ import org.apache.http.pool.ConnFactory;
 @Contract(threading = ThreadingBehavior.SAFE_CONDITIONAL)
 public class BasicConnPool extends AbstractConnPool<HttpHost, HttpClientConnection, BasicPoolEntry> {
 
+    // 本类就没有人用
+
     private static final AtomicLong COUNTER = new AtomicLong();
 
+    /**
+     *
+     */
     public BasicConnPool(final ConnFactory<HttpHost, HttpClientConnection> connFactory) {
         super(connFactory, 2, 20);
     }
@@ -81,9 +86,7 @@ public class BasicConnPool extends AbstractConnPool<HttpHost, HttpClientConnecti
     }
 
     @Override
-    protected BasicPoolEntry createEntry(
-            final HttpHost host,
-            final HttpClientConnection conn) {
+    protected BasicPoolEntry createEntry(final HttpHost host, final HttpClientConnection conn) {
         return new BasicPoolEntry(Long.toString(COUNTER.getAndIncrement()), host, conn);
     }
 

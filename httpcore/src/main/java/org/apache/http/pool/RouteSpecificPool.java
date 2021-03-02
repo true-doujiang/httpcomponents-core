@@ -42,6 +42,9 @@ abstract class RouteSpecificPool<T, C, E extends PoolEntry<T, C>> {
     private final LinkedList<E> available;
     private final LinkedList<Future<E>> pending;
 
+    /**
+     * default constructor
+     */
     RouteSpecificPool(final T route) {
         super();
         this.route = route;
@@ -50,6 +53,9 @@ abstract class RouteSpecificPool<T, C, E extends PoolEntry<T, C>> {
         this.pending = new LinkedList<Future<E>>();
     }
 
+    /**
+     * 子类实现  匿名内部类实现
+     */
     protected abstract E createEntry(C conn);
 
     public final T getRoute() {
@@ -72,6 +78,11 @@ abstract class RouteSpecificPool<T, C, E extends PoolEntry<T, C>> {
         return this.available.size() + this.leased.size();
     }
 
+    /**
+     *
+     * @param state
+     * @return
+     */
     public E getFree(final Object state) {
         if (!this.available.isEmpty()) {
             if (state != null) {

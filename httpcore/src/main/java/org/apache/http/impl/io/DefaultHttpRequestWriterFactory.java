@@ -46,17 +46,31 @@ public class DefaultHttpRequestWriterFactory implements HttpMessageWriterFactory
 
     public static final DefaultHttpRequestWriterFactory INSTANCE = new DefaultHttpRequestWriterFactory();
 
+    //
     private final LineFormatter lineFormatter;
 
+
+    /**
+     * constructor
+     */
     public DefaultHttpRequestWriterFactory(final LineFormatter lineFormatter) {
         super();
         this.lineFormatter = lineFormatter != null ? lineFormatter : BasicLineFormatter.INSTANCE;
     }
 
+
+    /**
+     * constructor
+     */
     public DefaultHttpRequestWriterFactory() {
         this(null);
     }
 
+
+
+    /**
+     * constructor
+     */
     @Override
     public HttpMessageWriter<HttpRequest> create(final SessionOutputBuffer buffer) {
         return new DefaultHttpRequestWriter(buffer, lineFormatter);
