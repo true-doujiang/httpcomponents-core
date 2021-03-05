@@ -125,9 +125,12 @@ public class HttpRequestExecutor {
         Args.notNull(conn, "Client connection");
         Args.notNull(context, "HTTP context");
         try {
+            // 这里实际已向服务端发送了请求
             HttpResponse response = doSendRequest(request, conn, context);
             System.out.println("HttpRequestExecutor execute.response = " + response);
+
             if (response == null) {
+                //
                 response = doReceiveResponse(request, conn, context);
 
                 System.out.println("HttpRequestExecutor execute.response2 = " + response);

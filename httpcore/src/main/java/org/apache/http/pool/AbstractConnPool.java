@@ -72,10 +72,12 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
 
     private final Lock lock;
     private final Condition condition;
+
     // org.apache.http.impl.conn.PoolingHttpClientConnectionManager.InternalConnectionFactory
     private final ConnFactory<T, C> connFactory;
     //
     private final Map<T, RouteSpecificPool<T, C, E>> routeToPool;
+
     private final Set<E> leased;
     private final LinkedList<E> available;
     private final LinkedList<Future<E>> pending;
@@ -83,7 +85,9 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
     private final Map<T, Integer> maxPerRoute;
 
     private volatile boolean isShutDown;
+    //
     private volatile int defaultMaxPerRoute;
+    //
     private volatile int maxTotal;
     private volatile int validateAfterInactivity;
 
@@ -98,15 +102,21 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
             final int maxTotal) {
         super();
         this.connFactory = Args.notNull(connFactory, "Connection factory");
+        //
         this.defaultMaxPerRoute = Args.positive(defaultMaxPerRoute, "Max per route value");
+        //
         this.maxTotal = Args.positive(maxTotal, "Max total value");
+
         this.lock = new ReentrantLock();
         this.condition = this.lock.newCondition();
         //
         this.routeToPool = new HashMap<T, RouteSpecificPool<T, C, E>>();
+
+        //
         this.leased = new HashSet<E>();
         this.available = new LinkedList<E>();
         this.pending = new LinkedList<Future<E>>();
+
         //
         this.maxPerRoute = new HashMap<T, Integer>();
     }
@@ -179,15 +189,19 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
         //
         RouteSpecificPool<T, C, E> pool = this.routeToPool.get(route);
         if (pool == null) {
-            // 匿名内部类
+
+            /*
+             * 匿名内部类
+             */
             pool = new RouteSpecificPool<T, C, E>(route) {
                 @Override
                 protected E createEntry(final C conn) {
-                    //
+                    // 调用外部类的子类方法 创建CPoolEntry
                     E entry = AbstractConnPool.this.createEntry(route, conn);
                     return entry;
                 }
             };
+
             // 缓存起来
             this.routeToPool.put(route, pool);
         }
@@ -216,7 +230,10 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
         Args.notNull(route, "Route");
         Asserts.check(!this.isShutDown, "Connection pool shut down");
 
-        // 匿名内部类
+        /*
+         * 匿名内部类
+         * E: CPoolEntry
+         */
         Future<E> future = new Future<E>() {
 
             private final AtomicBoolean cancelled = new AtomicBoolean(false);
@@ -261,7 +278,6 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
             }
 
             /**
-             *
              * @param timeout
              * @param timeUnit
              */
@@ -270,9 +286,16 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                     throws InterruptedException, ExecutionException, TimeoutException {
 
                 for (; ; ) {
+
+                    System.out.println("AbstractConnPool.lease.Future.get = " + timeout);
+
                     synchronized (this) {
+
+                        System.out.println("AbstractConnPool.lease.Future.this = " + this);
+
                         try {
                             final E entry = entryRef.get();
+                            System.out.println("AbstractConnPool.lease.Future.entry = " + entry);
                             if (entry != null) {
                                 return entry;
                             }
@@ -281,7 +304,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                                 throw new ExecutionException(operationAborted());
                             }
 
-                            // 外部类方法
+                            // E: CPoolEntry      外部类方法,下下面一个方法
                             final E leasedEntry = getPoolEntryBlocking(route, state, timeout, timeUnit, this);
 
                             if (validateAfterInactivity > 0) {
@@ -302,8 +325,13 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                                     callback.completed(leasedEntry);
                                 }
 
+                                // CPoolEntry
+                                System.out.println("AbstractConnPool leasedEntry = " + leasedEntry);
+
+                                //
                                 return leasedEntry;
                             } else {
+                                //
                                 release(leasedEntry, true);
                                 throw new ExecutionException(operationAborted());
                             }
@@ -346,31 +374,50 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
     }
 
     /**
+     * org.apache.http.pool.AbstractConnPool#lease()中的内部类调用
      *
      */
     private E getPoolEntryBlocking(
-            final T route, final Object state,
-            final long timeout, final TimeUnit timeUnit,
-            final Future<E> future) throws IOException, InterruptedException, ExecutionException, TimeoutException {
+            final T route,
+            final Object state,
+            final long timeout,
+            final TimeUnit timeUnit,
+            final Future<E> future)
+            throws IOException, InterruptedException, ExecutionException, TimeoutException {
 
         Date deadline = null;
         if (timeout > 0) {
             deadline = new Date (System.currentTimeMillis() + timeUnit.toMillis(timeout));
         }
+
         // 并发锁
         this.lock.lock();
+
         try {
             E entry;
+
             for (;;) {
+
                 Asserts.check(!this.isShutDown, "Connection pool shut down");
+
+                System.out.println("AbstractConnPool.getPoolEntryBlocking for1");
+
                 if (future.isCancelled()) {
                     throw new ExecutionException(operationAborted());
                 }
 
-                //
+                /*
+                 * 上面加锁应该是防止这里并发请求hashmap吧 ??
+                 * 匿名内部类
+                 */
                 final RouteSpecificPool<T, C, E> pool = getPool(route);
                 for (;;) {
+
+                    System.out.println("AbstractConnPool.getPoolEntryBlocking for2");
+
                     entry = pool.getFree(state);
+                    System.out.println("AbstractConnPool.getPoolEntryBlocking for2 entry = " + entry);
+
                     if (entry == null) {
                         break;
                     }
@@ -384,6 +431,8 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                         break;
                     }
                 }
+                // for end
+
                 if (entry != null) {
                     this.available.remove(entry);
                     this.leased.add(entry);
@@ -407,7 +456,9 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                     }
                 }
 
+                //
                 if (pool.getAllocatedCount() < maxPerRoute) {
+
                     final int totalUsed = this.leased.size();
                     final int freeCapacity = Math.max(this.maxTotal - totalUsed, 0);
                     if (freeCapacity > 0) {
@@ -431,7 +482,9 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                 }
 
                 boolean success = false;
+
                 try {
+                    //
                     pool.queue(future);
                     this.pending.add(future);
                     if (deadline != null) {
@@ -440,6 +493,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                         this.condition.await();
                         success = true;
                     }
+
                     if (future.isCancelled()) {
                         throw new ExecutionException(operationAborted());
                     }
@@ -451,13 +505,18 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                     pool.unqueue(future);
                     this.pending.remove(future);
                 }
+
                 // check for spurious wakeup vs. timeout
                 if (!success && (deadline != null && deadline.getTime() <= System.currentTimeMillis())) {
                     break;
                 }
-            }
+
+            } // for end
+
             throw new TimeoutException("Timeout waiting for connection");
+
         } finally {
+            // 释放锁
             this.lock.unlock();
         }
     }

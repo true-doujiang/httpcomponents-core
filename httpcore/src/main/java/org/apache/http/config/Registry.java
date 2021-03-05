@@ -42,8 +42,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Contract(threading = ThreadingBehavior.SAFE)
 public final class Registry<I> implements Lookup<I> {
 
+    //
     private final Map<String, I> map;
 
+    /**
+     * default constructor
+     */
     Registry(final Map<String, I> map) {
         super();
         this.map = new ConcurrentHashMap<String, I>(map);

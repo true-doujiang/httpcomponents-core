@@ -58,6 +58,10 @@ public final class RegistryBuilder<I> {
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
     public Registry<I> build() {
         return new Registry<I>(items);
     }

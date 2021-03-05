@@ -37,9 +37,13 @@ import org.apache.http.util.Asserts;
 
 abstract class RouteSpecificPool<T, C, E extends PoolEntry<T, C>> {
 
+    //
     private final T route;
+    //
     private final Set<E> leased;
+    //
     private final LinkedList<E> available;
+    //
     private final LinkedList<Future<E>> pending;
 
     /**
@@ -132,6 +136,11 @@ abstract class RouteSpecificPool<T, C, E extends PoolEntry<T, C>> {
         }
     }
 
+    /**
+     *
+     * @param conn
+     * @return
+     */
     public E add(final C conn) {
         final E entry = createEntry(conn);
         this.leased.add(entry);

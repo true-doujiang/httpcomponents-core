@@ -194,9 +194,13 @@ public class DefaultBHttpClientConnection
         response.setEntity(entity);
     }
 
+    /**
+     *
+     */
     @Override
     public void flush() throws IOException {
         ensureOpen();
+        // socket outputStream真正发送出去
         doFlush();
     }
 

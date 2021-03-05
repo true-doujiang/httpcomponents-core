@@ -53,6 +53,7 @@ public abstract class PoolEntry<T, C> {
 
     private final String id;
     private final T route;
+
     // LoggingManagedHttpClientConnection
     private final C conn;
     private final long created;
@@ -70,9 +71,10 @@ public abstract class PoolEntry<T, C> {
      * @param id unique identifier of the pool entry. May be {@code null}.
      * @param route route to the opposite endpoint.
      * @param conn the connection.
-     * @param timeToLive maximum time to live. May be zero if the connection
-     *   does not have an expiry deadline.
+     * @param timeToLive maximum time to live. May be zero if the connection does not have an expiry deadline.
      * @param timeUnit time unit.
+     *
+     *
      */
     public PoolEntry(final String id, final T route, final C conn,
             final long timeToLive, final TimeUnit timeUnit) {
@@ -105,6 +107,8 @@ public abstract class PoolEntry<T, C> {
      * @param id unique identifier of the pool entry. May be {@code null}.
      * @param route route to the opposite endpoint.
      * @param conn the connection.
+     *
+     *
      */
     public PoolEntry(final String id, final T route, final C conn) {
         this(id, route, conn, 0, TimeUnit.MILLISECONDS);
