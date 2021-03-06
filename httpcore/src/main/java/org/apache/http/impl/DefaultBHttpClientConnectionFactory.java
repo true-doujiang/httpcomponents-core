@@ -44,9 +44,13 @@ import java.net.Socket;
  * Default factory for {@link org.apache.http.HttpClientConnection}s.
  *
  * @since 4.3
+ *
+ * connection工厂
  */
 @Contract(threading = ThreadingBehavior.IMMUTABLE_CONDITIONAL)
-public class DefaultBHttpClientConnectionFactory implements HttpConnectionFactory<DefaultBHttpClientConnection> {
+public class DefaultBHttpClientConnectionFactory
+        //
+        implements HttpConnectionFactory<DefaultBHttpClientConnection> {
 
     public static final DefaultBHttpClientConnectionFactory INSTANCE = new DefaultBHttpClientConnectionFactory();
 
@@ -85,6 +89,9 @@ public class DefaultBHttpClientConnectionFactory implements HttpConnectionFactor
         this(null, null, null, null, null);
     }
 
+    /**
+     *
+     */
     @Override
     public DefaultBHttpClientConnection createConnection(final Socket socket) throws IOException {
         final DefaultBHttpClientConnection conn = new DefaultBHttpClientConnection(
@@ -97,6 +104,9 @@ public class DefaultBHttpClientConnectionFactory implements HttpConnectionFactor
                 this.outgoingContentStrategy,
                 this.requestWriterFactory,
                 this.responseParserFactory);
+
+        System.out.println("DefaultBHttpClientConnection = " + conn);
+
         conn.bind(socket);
         return conn;
     }

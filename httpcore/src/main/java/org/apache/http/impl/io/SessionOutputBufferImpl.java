@@ -61,6 +61,7 @@ public class SessionOutputBufferImpl implements SessionOutputBuffer, BufferInfo 
     //
     private final ByteArrayBuffer buffer;
     private final int fragementSizeHint;
+    //
     private final CharsetEncoder encoder;
 
     // socket outputStream

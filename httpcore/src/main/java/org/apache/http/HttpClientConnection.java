@@ -32,6 +32,7 @@ import java.io.IOException;
 /**
  * A client-side HTTP connection, which can be used for sending
  * requests and receiving responses.
+ * 客户端HTTP连接，可用于发送请求和接收响应
  *
  * @since 4.0
  */

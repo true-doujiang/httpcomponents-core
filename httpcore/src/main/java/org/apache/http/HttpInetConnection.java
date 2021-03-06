@@ -31,6 +31,7 @@ import java.net.InetAddress;
 
 /**
  * An HTTP connection over the Internet Protocol (IP).
+ * 通过Internet协议（IP）的HTTP连接
  *
  * @since 4.0
  */

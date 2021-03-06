@@ -60,7 +60,7 @@ public abstract class PoolEntry<T, C> {
     private final long validityDeadline;
 
     private long updated;
-
+    // 过期时间  时间戳
     private long expiry;
 
     private volatile Object state;

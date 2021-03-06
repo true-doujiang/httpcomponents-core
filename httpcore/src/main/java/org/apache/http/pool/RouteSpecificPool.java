@@ -39,11 +39,12 @@ abstract class RouteSpecificPool<T, C, E extends PoolEntry<T, C>> {
 
     //
     private final T route;
-    //
+
+    // 已在使用的
     private final Set<E> leased;
-    //
+    // 可以使用的
     private final LinkedList<E> available;
-    //
+    // 阻塞住的
     private final LinkedList<Future<E>> pending;
 
     /**
@@ -85,7 +86,6 @@ abstract class RouteSpecificPool<T, C, E extends PoolEntry<T, C>> {
     /**
      *
      * @param state
-     * @return
      */
     public E getFree(final Object state) {
         if (!this.available.isEmpty()) {
@@ -100,6 +100,7 @@ abstract class RouteSpecificPool<T, C, E extends PoolEntry<T, C>> {
                     }
                 }
             }
+
             final Iterator<E> it = this.available.iterator();
             while (it.hasNext()) {
                 final E entry = it.next();
@@ -184,15 +185,25 @@ abstract class RouteSpecificPool<T, C, E extends PoolEntry<T, C>> {
     @Override
     public String toString() {
         final StringBuilder buffer = new StringBuilder();
+
+        buffer.append("{\r\n");
+        buffer.append("   ");
+        buffer.append(super.toString());
+        buffer.append("\r\n");
+        buffer.append("   ");
         buffer.append("[route: ");
         buffer.append(this.route);
-        buffer.append("][leased: ");
+        buffer.append("]   \r\n   [leased: ");
         buffer.append(this.leased.size());
-        buffer.append("][available: ");
+        buffer.append(this.leased);
+        buffer.append("]   \r\n   [available: ");
         buffer.append(this.available.size());
-        buffer.append("][pending: ");
+        buffer.append(this.available);
+        buffer.append("]   \r\n   [pending: ");
         buffer.append(this.pending.size());
+        buffer.append(this.pending);
         buffer.append("]");
+        buffer.append("\r\n}");
         return buffer.toString();
     }
 

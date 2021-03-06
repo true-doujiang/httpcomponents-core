@@ -32,6 +32,7 @@ import java.io.IOException;
 
 /**
  * A generic HTTP connection, useful on client and server side.
+ * 通用HTTP连接，对客户端和服务器端有用
  *
  * @since 4.0
  */

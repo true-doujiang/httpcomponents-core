@@ -82,9 +82,13 @@ public class BHttpConnectionBase implements HttpInetConnection {
 
     private final MessageConstraints messageConstraints;
     private final HttpConnectionMetricsImpl connMetrics;
+    //
     private final ContentLengthStrategy incomingContentStrategy;
     private final ContentLengthStrategy outgoingContentStrategy;
-    //
+
+    /*
+     * socket引用其实就是socket  本层级加入了socket引用
+     */
     private final AtomicReference<Socket> socketHolder;
 
     /**
@@ -121,16 +125,22 @@ public class BHttpConnectionBase implements HttpInetConnection {
         final HttpTransportMetricsImpl outTransportMetrics = new HttpTransportMetricsImpl();
         MessageConstraints messageConstraints1 = messageConstraints != null ? messageConstraints : MessageConstraints.DEFAULT;
 
-        this.inBuffer = new SessionInputBufferImpl(inTransportMetrics, bufferSize, -1, messageConstraints1, charDecoder);
-
-        this.outbuffer = new SessionOutputBufferImpl(outTransportMetrics, bufferSize, fragmentSizeHint, charEncoder);
+        //
+        SessionInputBufferImpl inputBuffer = new SessionInputBufferImpl(inTransportMetrics, bufferSize, -1, messageConstraints1, charDecoder);
+        this.inBuffer = inputBuffer;
+        SessionOutputBufferImpl outputBuffer = new SessionOutputBufferImpl(outTransportMetrics, bufferSize, fragmentSizeHint, charEncoder);
+        this.outbuffer = outputBuffer;
 
         this.messageConstraints = messageConstraints;
+
         this.connMetrics = new HttpConnectionMetricsImpl(inTransportMetrics, outTransportMetrics);
+
+        //
         this.incomingContentStrategy = incomingContentStrategy != null ? incomingContentStrategy :
             LaxContentLengthStrategy.INSTANCE;
         this.outgoingContentStrategy = outgoingContentStrategy != null ? outgoingContentStrategy :
             StrictContentLengthStrategy.INSTANCE;
+
         //
         this.socketHolder = new AtomicReference<Socket>();
     }
@@ -168,10 +178,17 @@ public class BHttpConnectionBase implements HttpInetConnection {
      *
      * @param socket the socket.
      * @throws IOException in case of an I/O error.
+     *
+     * 3 bind
+     *
      */
     protected void bind(final Socket socket) throws IOException {
         Args.notNull(socket, "Socket");
+
+        //
         this.socketHolder.set(socket);
+        System.out.println("socket=" + socket + " 绑定到connection上了= " + this);
+
         this.inBuffer.bind(null);
         this.outbuffer.bind(null);
     }
@@ -385,11 +402,18 @@ public class BHttpConnectionBase implements HttpInetConnection {
         return this.connMetrics;
     }
 
+    /**
+     *
+     */
     @Override
     public String toString() {
         final Socket socket = this.socketHolder.get();
         if (socket != null) {
             final StringBuilder buffer = new StringBuilder();
+
+            buffer.append(super.toString()).append("---");
+            buffer.append(socket); //.append("---");
+
             final SocketAddress remoteAddress = socket.getRemoteSocketAddress();
             final SocketAddress localAddress = socket.getLocalSocketAddress();
             if (remoteAddress != null && localAddress != null) {
@@ -399,7 +423,8 @@ public class BHttpConnectionBase implements HttpInetConnection {
             }
             return buffer.toString();
         }
-        return "[Not bound]";
+
+        return super.toString() + "---[Not bound socket]";
     }
 
 }

@@ -54,9 +54,10 @@ import org.apache.http.util.Args;
  * @since 4.3
  */
 public class DefaultBHttpClientConnection
+        //      含义socket引用   2人都继承了HttpConnection接口
         extends BHttpConnectionBase implements HttpClientConnection {
 
-    //
+    // 研究下本类的层级作用
     private final HttpMessageParser<HttpResponse> responseParser;
     //
     private final HttpMessageWriter<HttpRequest> requestWriter;
@@ -131,6 +132,9 @@ public class DefaultBHttpClientConnection
     protected void onRequestSubmitted(final HttpRequest request) {
     }
 
+    /**
+     * 2 bind
+     */
     @Override
     public void bind(final Socket socket) throws IOException {
         super.bind(socket);

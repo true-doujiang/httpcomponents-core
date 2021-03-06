@@ -64,6 +64,7 @@ public class SessionInputBufferImpl implements SessionInputBuffer, BufferInfo {
     private final ByteArrayBuffer lineBuffer;
     private final int minChunkLimit;
     private final MessageConstraints constraints;
+    //
     private final CharsetDecoder decoder;
     //
     private InputStream inStream;

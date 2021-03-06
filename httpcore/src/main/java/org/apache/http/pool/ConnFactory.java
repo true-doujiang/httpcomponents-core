@@ -36,6 +36,9 @@ import java.io.IOException;
  *   connection.
  * @param <C> the connection type.
  * @since 4.2
+ *
+ *
+ *
  */
 public interface ConnFactory<T, C> {
 

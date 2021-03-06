@@ -191,10 +191,12 @@ public class ConnectionConfig implements Cloneable {
             }
             final int bufSize = this.bufferSize > 0 ? this.bufferSize : 8 * 1024;
             final int fragmentHintSize  = this.fragmentSizeHint >= 0 ? this.fragmentSizeHint : bufSize;
-            return new ConnectionConfig(bufSize, fragmentHintSize, cs,
+            ConnectionConfig connectionConfig = new ConnectionConfig(bufSize, fragmentHintSize, cs,
                     malformedInputAction,
                     unmappableInputAction,
                     messageConstraints);
+            System.out.println("build connectionConfig = " + connectionConfig);
+            return connectionConfig;
         }
 
     }

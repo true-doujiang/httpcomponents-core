@@ -117,6 +117,9 @@ public class DefaultBHttpServerConnection extends BHttpConnectionBase implements
     protected void onResponseSubmitted(final HttpResponse response) {
     }
 
+    /**
+     * 3 bind
+     */
     @Override
     public void bind(final Socket socket) throws IOException {
         super.bind(socket);

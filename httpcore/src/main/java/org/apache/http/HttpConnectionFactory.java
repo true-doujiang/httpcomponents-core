@@ -32,6 +32,7 @@ import java.net.Socket;
 
 /**
  * Factory for {@link HttpConnection} instances.
+ * connection工厂 core模块
  *
  * @since 4.3
  */
