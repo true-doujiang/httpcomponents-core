@@ -46,6 +46,7 @@ import org.apache.http.util.Args;
 public class BasicHttpContext implements HttpContext {
 
     private final HttpContext parentContext;
+    //
     private final Map<String, Object> map;
 
     /**

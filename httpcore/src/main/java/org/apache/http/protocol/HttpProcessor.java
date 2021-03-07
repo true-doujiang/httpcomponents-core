@@ -47,6 +47,8 @@ import org.apache.http.HttpResponseInterceptor;
  * access to those variables is synchronized.
  *
  * @since 4.0
+ *
+ * 拦截器集合接口
  */
 public interface HttpProcessor extends HttpRequestInterceptor, HttpResponseInterceptor {
 

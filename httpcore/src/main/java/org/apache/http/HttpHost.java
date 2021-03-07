@@ -41,6 +41,9 @@ import org.apache.http.util.LangUtils;
  * This includes remote host name, port and scheme.
  *
  * @since 4.0
+ *
+ * final类哦
+ *
  */
 @Contract(threading = ThreadingBehavior.IMMUTABLE)
 public final class HttpHost implements Cloneable, Serializable {

@@ -42,7 +42,7 @@ import org.apache.http.annotation.Contract;
  *
  * @since 4.1
  *
- *
+ * 拦截器集合类
  */
 @Contract(threading = ThreadingBehavior.IMMUTABLE_CONDITIONAL)
 public final class ImmutableHttpProcessor implements HttpProcessor {

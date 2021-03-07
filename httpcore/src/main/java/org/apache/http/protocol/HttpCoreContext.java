@@ -72,6 +72,10 @@ public class HttpCoreContext implements HttpContext {
      */
     public static final String HTTP_REQ_SENT    = "http.request_sent";
 
+
+    /**
+     *
+     */
     public static HttpCoreContext create() {
         return new HttpCoreContext(new BasicHttpContext());
     }
@@ -89,13 +93,6 @@ public class HttpCoreContext implements HttpContext {
     private final HttpContext context;
 
 
-    /**
-     * constructor
-     */
-    public HttpCoreContext(final HttpContext context) {
-        super();
-        this.context = context;
-    }
 
     /**
      * default constructor
@@ -103,6 +100,14 @@ public class HttpCoreContext implements HttpContext {
     public HttpCoreContext() {
         super();
         this.context = new BasicHttpContext();
+    }
+
+    /**
+     * constructor
+     */
+    public HttpCoreContext(final HttpContext context) {
+        super();
+        this.context = context;
     }
 
     @Override
