@@ -42,7 +42,10 @@ import org.apache.http.util.Args;
 @SuppressWarnings("deprecation")
 public abstract class AbstractHttpMessage implements HttpMessage {
 
-    // http请求头 请求拦截器链会添加请求头
+    /*
+     * http请求头 请求拦截器链会添加请求头
+     * 所以想httpget httppost....都应该继承类存放请求头信息
+     */
     protected HeaderGroup headergroup;
 
     /**
@@ -61,7 +64,11 @@ public abstract class AbstractHttpMessage implements HttpMessage {
         this.params = params;
     }
 
+    /**
+     * default constructor
+     */
     protected AbstractHttpMessage() {
+        // 上面一个构造器 都废弃了还调用呢
         this(null);
     }
 

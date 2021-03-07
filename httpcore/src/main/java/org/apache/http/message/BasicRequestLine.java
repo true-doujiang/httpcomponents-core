@@ -50,7 +50,7 @@ public class BasicRequestLine implements RequestLine, Cloneable, Serializable {
     private final String uri;
 
     /**
-     * constructor
+     * default constructor
      */
     public BasicRequestLine(final String method,
                             final String uri,

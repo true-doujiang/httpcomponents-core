@@ -114,8 +114,7 @@ public final class HttpProtocolParams implements CoreProtocolPNames {
      */
     public static ProtocolVersion getVersion(final HttpParams params) {
         Args.notNull(params, "HTTP parameters");
-        final Object param = params.getParameter
-            (CoreProtocolPNames.PROTOCOL_VERSION);
+        final Object param = params.getParameter(CoreProtocolPNames.PROTOCOL_VERSION);
         if (param == null) {
             return HttpVersion.HTTP_1_1;
         }
