@@ -50,6 +50,9 @@ public class SocketConfig implements Cloneable {
     private final int rcvBufSize;
     private final int backlogSize;
 
+    /**
+     * default constructor
+     */
     SocketConfig(
             final int soTimeout,
             final boolean soReuseAddress,

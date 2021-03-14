@@ -82,11 +82,13 @@ public final class HttpHost implements Cloneable, Serializable {
         super();
         this.hostname   = Args.containsNoBlanks(hostname, "Host name");
         this.lcHostname = hostname.toLowerCase(Locale.ROOT);
+
         if (scheme != null) {
             this.schemeName = scheme.toLowerCase(Locale.ROOT);
         } else {
             this.schemeName = DEFAULT_SCHEME_NAME;
         }
+
         this.port = port;
         this.address = null;
     }

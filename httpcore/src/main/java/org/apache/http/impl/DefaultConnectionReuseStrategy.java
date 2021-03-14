@@ -27,17 +27,7 @@
 
 package org.apache.http.impl;
 
-import org.apache.http.ConnectionReuseStrategy;
-import org.apache.http.Header;
-import org.apache.http.HeaderIterator;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
-import org.apache.http.ParseException;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.TokenIterator;
+import org.apache.http.*;
 import org.apache.http.annotation.Contract;
 import org.apache.http.annotation.ThreadingBehavior;
 import org.apache.http.message.BasicTokenIterator;
@@ -69,14 +59,16 @@ public class DefaultConnectionReuseStrategy implements ConnectionReuseStrategy {
 
     public static final DefaultConnectionReuseStrategy INSTANCE = new DefaultConnectionReuseStrategy();
 
+    /**
+     * default constructor
+     */
     public DefaultConnectionReuseStrategy() {
         super();
     }
 
     // see interface ConnectionReuseStrategy
     @Override
-    public boolean keepAlive(final HttpResponse response,
-                             final HttpContext context) {
+    public boolean keepAlive(final HttpResponse response, final HttpContext context) {
         Args.notNull(response, "HTTP response");
         Args.notNull(context, "HTTP context");
 
@@ -105,7 +97,8 @@ public class DefaultConnectionReuseStrategy implements ConnectionReuseStrategy {
         final HttpRequest request = (HttpRequest) context.getAttribute(HttpCoreContext.HTTP_REQUEST);
         if (request != null) {
             try {
-                final TokenIterator ti = new BasicTokenIterator(request.headerIterator(HttpHeaders.CONNECTION));
+                HeaderIterator iterator = request.headerIterator(HttpHeaders.CONNECTION);
+                final TokenIterator ti = new BasicTokenIterator(iterator);
                 while (ti.hasNext()) {
                     final String token = ti.nextToken();
                     if (HTTP.CONN_CLOSE.equalsIgnoreCase(token)) {
@@ -219,11 +212,17 @@ public class DefaultConnectionReuseStrategy implements ConnectionReuseStrategy {
         return new BasicTokenIterator(hit);
     }
 
+    /**
+     *
+     */
     private boolean canResponseHaveBody(final HttpRequest request, final HttpResponse response) {
-        if (request != null && request.getRequestLine().getMethod().equalsIgnoreCase("HEAD")) {
+        RequestLine requestLine = request.getRequestLine();
+        if (request != null && requestLine.getMethod().equalsIgnoreCase("HEAD")) {
             return false;
         }
+
         final int status = response.getStatusLine().getStatusCode();
+
         return status >= HttpStatus.SC_OK
             && status != HttpStatus.SC_NO_CONTENT
             && status != HttpStatus.SC_NOT_MODIFIED

@@ -213,6 +213,7 @@ public class HttpRequestExecutor {
 
         context.setAttribute(HttpCoreContext.HTTP_CONNECTION, conn);
         context.setAttribute(HttpCoreContext.HTTP_REQ_SENT, Boolean.FALSE);
+
         // CPoolProxy
         conn.sendRequestHeader(request);
 

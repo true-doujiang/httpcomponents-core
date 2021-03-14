@@ -139,13 +139,20 @@ public class SessionInputBufferImpl implements SessionInputBuffer, BufferInfo {
         return capacity() - length();
     }
 
+    /**
+     *
+     */
     private int streamRead(final byte[] b, final int off, final int len) throws IOException {
         Asserts.notNull(this.inStream, "Input stream");
         return this.inStream.read(b, off, len);
     }
 
+    /**
+     *
+     */
     public int fillBuffer() throws IOException {
         // compact the buffer if necessary
+
         if (this.bufferPos > 0) {
             final int len = this.bufferLen - this.bufferPos;
             if (len > 0) {
@@ -154,15 +161,23 @@ public class SessionInputBufferImpl implements SessionInputBuffer, BufferInfo {
             this.bufferPos = 0;
             this.bufferLen = len;
         }
+
         final int readLen;
         final int off = this.bufferLen;
         final int len = this.buffer.length - off;
+
         readLen = streamRead(this.buffer, off, len);
+
+        String s = new String(this.buffer, off, len);
+        System.out.println("SessionInputBufferImpl fillBuffer readLen = " + readLen + " 内容 : \r\n-----" + s + "\r\n-------");
+
         if (readLen == -1) {
             return -1;
         }
+
         this.bufferLen = off + readLen;
         this.metrics.incrementBytesTransferred(readLen);
+
         return readLen;
     }
 
@@ -408,4 +423,11 @@ public class SessionInputBufferImpl implements SessionInputBuffer, BufferInfo {
         return this.metrics;
     }
 
+
+    @Override
+    public String toString() {
+        String string = super.toString();
+        String s = new String(buffer);
+        return string + " 内容: " + s;
+    }
 }

@@ -51,6 +51,8 @@ public interface HttpConnection extends Closeable {
     /**
      * Checks if this connection is open.
      * @return true if it is open, false if it is closed.
+     *
+     * 检查此连接是否打开。 如果打开则为true，如果关闭则为false。
      */
     boolean isOpen();
 
@@ -68,6 +70,8 @@ public interface HttpConnection extends Closeable {
      * @return  {@code true} if attempts to use this connection are
      *          likely to succeed, or {@code false} if they are likely
      *          to fail and this connection should be closed
+     *
+     * 很重要的方法，用于检测连接是否已经断开
      */
     boolean isStale();
 

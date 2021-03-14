@@ -30,6 +30,7 @@ import org.apache.http.annotation.Contract;
 import org.apache.http.annotation.ThreadingBehavior;
 import org.apache.http.util.Args;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -56,7 +57,10 @@ public abstract class PoolEntry<T, C> {
 
     // LoggingManagedHttpClientConnection
     private final C conn;
+
+    // 构造器中初始化，当前时间毫秒数
     private final long created;
+    //
     private final long validityDeadline;
 
     private long updated;
@@ -64,6 +68,11 @@ public abstract class PoolEntry<T, C> {
     private long expiry;
 
     private volatile Object state;
+
+    // 我的自定义属性
+    private final Date createdDate;
+    private Date updatedDate;
+    private Date expiryDate;
 
     /**
      * Creates new {@code PoolEntry} instance.
@@ -74,7 +83,7 @@ public abstract class PoolEntry<T, C> {
      * @param timeToLive maximum time to live. May be zero if the connection does not have an expiry deadline.
      * @param timeUnit time unit.
      *
-     *
+     *  org.apache.http.impl.conn.CPool#createEntry 调用子类构造器
      */
     public PoolEntry(final String id, final T route, final C conn,
             final long timeToLive, final TimeUnit timeUnit) {
@@ -89,8 +98,13 @@ public abstract class PoolEntry<T, C> {
         this.route = route;
         //
         this.conn = conn;
+        // 当前时间毫秒数
         this.created = System.currentTimeMillis();
         this.updated = this.created;
+
+        this.createdDate = new Date(created);
+        this.updatedDate = new Date(updated);
+
         if (timeToLive > 0) {
             final long deadline = this.created + timeUnit.toMillis(timeToLive);
             // If the above overflows then default to Long.MAX_VALUE
@@ -98,7 +112,9 @@ public abstract class PoolEntry<T, C> {
         } else {
             this.validityDeadline = Long.MAX_VALUE;
         }
+
         this.expiry = this.validityDeadline;
+        this.expiryDate = new Date(expiry);
     }
 
     /**
@@ -161,25 +177,34 @@ public abstract class PoolEntry<T, C> {
         return this.expiry;
     }
 
+    /**
+     * 同步更新过期时间
+     */
     public synchronized void updateExpiry(final long time, final TimeUnit timeUnit) {
         Args.notNull(timeUnit, "Time unit");
+
         this.updated = System.currentTimeMillis();
+
         final long newExpiry;
         if (time > 0) {
             newExpiry = this.updated + timeUnit.toMillis(time);
         } else {
             newExpiry = Long.MAX_VALUE;
         }
+
         this.expiry = Math.min(newExpiry, this.validityDeadline);
     }
 
+    /**
+     * 同步判断是否过期
+     */
     public synchronized boolean isExpired(final long now) {
         return now >= this.expiry;
     }
 
     /**
-     * Invalidates the pool entry and closes the pooled connection associated
-     * with it.
+     * Invalidates the pool entry and closes the pooled connection associated with it.
+     *
      */
     public abstract void close();
 
@@ -198,6 +223,9 @@ public abstract class PoolEntry<T, C> {
         buffer.append("][state:");
         buffer.append(this.state);
         buffer.append("]");
+        buffer.append("[创建时间:").append(this.createdDate.toLocaleString()).append("]");
+        buffer.append("[更新时间:").append(this.updatedDate.toLocaleString()).append("]");
+        buffer.append("[过期时间:").append(this.expiryDate.toLocaleString()).append("]");
         return buffer.toString();
     }
 

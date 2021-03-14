@@ -360,8 +360,13 @@ public class BHttpConnectionBase implements HttpInetConnection {
         final int oldtimeout = socket.getSoTimeout();
         try {
             socket.setSoTimeout(timeout);
-            return this.inBuffer.fillBuffer();
+            //
+            int i = this.inBuffer.fillBuffer();
+            return i;
+
+            // 这里没有直接把异常catch住，而是抛给调用方处理
         } finally {
+            // 在恢复原来的读超时时间
             socket.setSoTimeout(oldtimeout);
         }
     }
@@ -374,17 +379,29 @@ public class BHttpConnectionBase implements HttpInetConnection {
         return this.inBuffer.hasBufferedData();
     }
 
+    /**
+     * 用于检测连接是否已经断开
+     * stale  adj.不新鲜的; (空气)污浊的; (烟味)难闻的; 陈腐的; 没有新意的; 老掉牙的;
+     */
     @Override
     public boolean isStale() {
+        // 连socket都没有肯定不行，则不可用
         if (!isOpen()) {
             return true;
         }
+
         try {
+            //socket链路有了，测试链路是否可用
+            //这里的测试方法是查看很短的时间内（这里是1ms），是否可以从输入流中读到数据，1ms必定超时啊
+            //如果测试结果返回-1说明不可用
             final int bytesRead = fillInputBuffer(1);
             return bytesRead < 0;
         } catch (final SocketTimeoutException ex) {
+            ex.printStackTrace();
+            //注意这里SocketTimeoutException时，认为是可用的
             return false;
         } catch (final IOException ex) {
+            //有I/O异常，不可用
             return true;
         }
     }

@@ -195,16 +195,18 @@ public final class EntityUtils {
         return mimeType;
     }
 
-    private static String toString(
-            final HttpEntity entity,
-            final ContentType contentType) throws IOException {
+    private static String toString(final HttpEntity entity, final ContentType contentType) throws IOException {
+        // entity: ResponseEntityProxy
+        // EofSensorInputStream
         final InputStream inStream = entity.getContent();
         if (inStream == null) {
             return null;
         }
+
         try {
             Args.check(entity.getContentLength() <= Integer.MAX_VALUE,
                     "HTTP entity too large to be buffered in memory");
+
             int capacity = (int)entity.getContentLength();
             if (capacity < 0) {
                 capacity = DEFAULT_BUFFER_SIZE;
@@ -217,16 +219,20 @@ public final class EntityUtils {
                     charset = defaultContentType != null ? defaultContentType.getCharset() : null;
                 }
             }
+
             if (charset == null) {
                 charset = HTTP.DEF_CONTENT_CHARSET;
             }
+
             final Reader reader = new InputStreamReader(inStream, charset);
             final CharArrayBuffer buffer = new CharArrayBuffer(capacity);
             final char[] tmp = new char[1024];
             int l;
+
             while((l = reader.read(tmp)) != -1) {
                 buffer.append(tmp, 0, l);
             }
+
             return buffer.toString();
         } finally {
             inStream.close();

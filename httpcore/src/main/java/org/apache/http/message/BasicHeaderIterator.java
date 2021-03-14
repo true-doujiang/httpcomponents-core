@@ -48,20 +48,17 @@ public class BasicHeaderIterator implements HeaderIterator {
      */
     protected final Header[] allHeaders;
 
-
     /**
      * The position of the next header in {@link #allHeaders allHeaders}.
      * Negative if the iteration is over.
      */
     protected int currentIndex;
 
-
     /**
      * The header name to filter by.
      * {@code null} to iterate over all headers in the array.
      */
     protected String headerName;
-
 
 
     /**
@@ -156,8 +153,7 @@ public class BasicHeaderIterator implements HeaderIterator {
      * @throws NoSuchElementException   if there are no more headers
      */
     @Override
-    public final Object next()
-        throws NoSuchElementException {
+    public final Object next() throws NoSuchElementException {
         return nextHeader();
     }
 
@@ -168,10 +164,7 @@ public class BasicHeaderIterator implements HeaderIterator {
      * @throws UnsupportedOperationException    always
      */
     @Override
-    public void remove()
-        throws UnsupportedOperationException {
-
-        throw new UnsupportedOperationException
-            ("Removing headers is not supported.");
+    public void remove() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("Removing headers is not supported.");
     }
 }

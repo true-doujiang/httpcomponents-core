@@ -50,6 +50,7 @@ import org.apache.http.annotation.ThreadingBehavior;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.util.Args;
 import org.apache.http.util.Asserts;
+import org.apache.log4j.Logger;
 
 /**
  * Abstract synchronous (blocking) pool of connections.
@@ -70,6 +71,11 @@ import org.apache.http.util.Asserts;
 public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
 
                        implements ConnPool<T, E>, ConnPoolControl<T> {
+
+
+
+    private final Logger log = Logger.getLogger(getClass());
+
 
     private final Lock lock;
     private final Condition condition;
@@ -94,6 +100,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
     private volatile int defaultMaxPerRoute;
     //
     private volatile int maxTotal;
+    // PoolingHttpClientConnectionManager 构造器中直接设置为 2000
     private volatile int validateAfterInactivity;
 
     /**
@@ -134,25 +141,25 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
     protected abstract E createEntry(T route, C conn);
 
     /**
-     * @since 4.3
+     * @since 4.3 空实现，没子类扩展
      */
     protected void onLease(final E entry) {
     }
 
     /**
-     * @since 4.3
+     * @since 4.3 空实现，没子类扩展
      */
     protected void onRelease(final E entry) {
     }
 
     /**
-     * @since 4.4
+     * @since 4.4 空实现，没子类扩展
      */
     protected void onReuse(final E entry) {
     }
 
     /**
-     * @since 4.4
+     * @since 4.4 子类扩展了 ****很重要 ****
      */
     protected boolean validate(final E entry) {
         return true;
@@ -194,27 +201,27 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
      */
     private RouteSpecificPool<T, C, E> getPool(final T route) {
         //
-        RouteSpecificPool<T, C, E> pool = this.routeToPool.get(route);
-        if (pool == null) {
+        RouteSpecificPool<T, C, E> specificPool = this.routeToPool.get(route);
 
+        if (specificPool == null) {
             /*
              * 匿名内部类
              */
-            pool = new RouteSpecificPool<T, C, E>(route) {
+            specificPool = new RouteSpecificPool<T, C, E>(route) {
                 @Override
                 protected E createEntry(final C conn) {
-                    // 调用外部类的子类方法 创建CPoolEntry
+                    // 调用外部类的子类方法 创建CPoolEntry   this:CPool
                     E entry = AbstractConnPool.this.createEntry(route, conn);
                     return entry;
                 }
             };
 
-            System.out.println(this + "--\r\n--getPool() 创建匿名内部类 RouteSpecificPool --\r\n--" + pool);
+            log.info(this + "--\r\n--getPool() 创建匿名内部类 RouteSpecificPool --\r\n--" + specificPool);
             // 缓存起来
-            this.routeToPool.put(route, pool);
+            this.routeToPool.put(route, specificPool);
         }
 
-        return pool;
+        return specificPool;
     }
 
     private static Exception operationAborted() {
@@ -246,8 +253,10 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
 
             private final AtomicBoolean cancelled = new AtomicBoolean(false);
             private final AtomicBoolean done = new AtomicBoolean(false);
+            // 存放CPoolEntry的引用
             private final AtomicReference<E> entryRef = new AtomicReference<E>(null);
 
+            // 匿名内部类 cancel()
             @Override
             public boolean cancel(final boolean mayInterruptIfRunning) {
                 if (done.compareAndSet(false, true)) {
@@ -266,16 +275,19 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                 return false;
             }
 
+            // 匿名内部类 isCancelled()
             @Override
             public boolean isCancelled() {
                 return cancelled.get();
             }
 
+            // 匿名内部类 isDone()
             @Override
             public boolean isDone() {
                 return done.get();
             }
 
+            // 匿名内部类 get()
             @Override
             public E get() throws InterruptedException, ExecutionException {
                 try {
@@ -286,8 +298,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
             }
 
             /**
-             * @param timeout
-             * @param timeUnit
+             * 一般都是调用这个方法
              */
             @Override
             public E get(final long timeout, final TimeUnit timeUnit)
@@ -295,15 +306,17 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
 
                 for (; ; ) {
 
-                    System.out.println("AbstractConnPool.lease.Future.get = " + timeout);
+                    //System.out.println("AbstractConnPool.lease.Future.get = " + timeout);
 
+                    // 加锁是为了防止哪里的？？  this:本future实例本身
                     synchronized (this) {
 
-                        System.out.println("AbstractConnPool.lease.Future.this = " + this);
+                        //System.out.println("AbstractConnPool.lease.Future.this = " + this);
 
                         try {
                             final E entry = entryRef.get();
-                            System.out.println("AbstractConnPool.lease.Future.entry = " + entry);
+                            log.info("Future.get from entryRef : " + entry);
+
                             if (entry != null) {
                                 return entry;
                             }
@@ -314,13 +327,22 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
 
                             // E: CPoolEntry      外部类方法,下下面一个方法
                             final E leasedEntry = getPoolEntryBlocking(route, state, timeout, timeUnit, this);
+                            log.info("Future.get from getPoolEntryBlocking : " + leasedEntry);
 
                             if (validateAfterInactivity > 0) {
+                                // 当前时间 > 创建时间 + 过多久我觉得应该验证的秒数
                                 if (leasedEntry.getUpdated() + validateAfterInactivity <= System.currentTimeMillis()) {
+                                    log.info(" need validate");
+                                    // https://www.cnblogs.com/shoren/p/httpclient-leaseConnection.html
+                                    //
                                     if (!validate(leasedEntry)) {
+                                        log.info(" validate fail");
+                                        // leasedEntry中的conn不能再被使用了，那就释放关闭掉
                                         leasedEntry.close();
                                         release(leasedEntry, false);
                                         continue;
+                                    } else {
+                                        log.info(" validate success");
                                     }
                                 }
                             }
@@ -328,15 +350,15 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                             if (done.compareAndSet(false, true)) {
                                 entryRef.set(leasedEntry);
                                 done.set(true);
+
+                                // 空实现，没子类扩展
                                 onLease(leasedEntry);
                                 if (callback != null) {
                                     callback.completed(leasedEntry);
                                 }
 
                                 // CPoolEntry
-                                System.out.println("AbstractConnPool leasedEntry = " + leasedEntry);
-
-                                //
+                                log.info(" done leasedEntry = " + leasedEntry);
                                 return leasedEntry;
                             } else {
                                 //
@@ -353,10 +375,12 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                         }
                     }
                 }
-            }
+            } //----get() end-----
+
         };
 
-        System.out.println(this + "--\r\n--lease() 创建匿名内部类 future = " + future);
+        // this: CPool 连接池管理器中的
+        log.info(this + "--\r\n--lease() 创建匿名内部类 future = " + future);
 
         return future;
     }
@@ -410,7 +434,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
 
                 Asserts.check(!this.isShutDown, "Connection pool shut down");
 
-                System.out.println("AbstractConnPool.getPoolEntryBlocking for1");
+                log.info("AbstractConnPool.getPoolEntryBlocking for1");
 
                 if (future.isCancelled()) {
                     throw new ExecutionException(operationAborted());
@@ -422,32 +446,38 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                  *
                  * 从Map中获取该route对应的连接池，若Map中没有，则创建该route对应的连接池
                  */
-                final RouteSpecificPool<T, C, E> routerPool = getPool(route);
-                System.out.println(Thread.currentThread().getName() +
-                        " AbstractConnPool.getPoolEntryBlocking routerPool--\r\n--" + routerPool);
+                final RouteSpecificPool<T, C, E> specificPool = getPool(route);
+                log.info("AbstractConnPool.getPoolEntryBlocking routerPool--\r\n--" + specificPool);
 
                 for (;;) {
 
-                    System.out.println(Thread.currentThread().getName() + " AbstractConnPool.getPoolEntryBlocking for2");
+                    log.info("AbstractConnPool.getPoolEntryBlocking for2");
 
                     // 获取 同一状态的 空闲连接，即从available链表的头部中移除，添加到leased集合中
-                    entry = routerPool.getFree(state);
-                    System.out.println(Thread.currentThread().getName() + " AbstractConnPool.getPoolEntryBlocking for2 entry = " + entry);
+                    entry = specificPool.getFree(state);
+                    log.info("AbstractConnPool.getPoolEntryBlocking for2 entry = " + entry);
+
                     if (entry == null) {
                         break;
                     }
-                    if (entry.isExpired(System.currentTimeMillis())) {
-                        System.out.println(Thread.currentThread().getName() + " 超时关闭  entry = " + entry);
+
+                    long now = System.currentTimeMillis();
+                    long expiry = entry.getExpiry();
+                    log.info("expiry= " + expiry + " now= " + now + " expiry>now? = " + (expiry > now));
+
+                    // 下面是确定连接有效（未过期，未关闭）
+                    if (entry.isExpired(now)) {
+                        log.info("超时关闭  entry = " + entry);
                         // 关闭底层的socket 还有对应的输入输出流
                         entry.close();
                     }
 
                     if (entry.isClosed()) {
-                        System.out.println(Thread.currentThread().getName() + " 已关闭移除  entry = " + entry);
+                        log.info("已关闭移除  entry = " + entry);
                         // 若该连接已关闭，则总的available链表中删除该连接
                         this.available.remove(entry);
                         // 从该route对应的连接池的leased集合中删除该连接，并且不回收到available链表中
-                        routerPool.free(entry, false);
+                        specificPool.free(entry, false);
                     } else {
                         break;
                     }
@@ -455,6 +485,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                 // for end
 
                 if (entry != null) {
+                    // 从大小连接池可用连接队列移除，放入已经在用的租借队列
                     // 若获取的连接不为空，将连接从总的available链表移除，并添加到leased集合中
                     // 获取连接成功，直接返回
                     this.available.remove(entry);
@@ -468,21 +499,21 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
 
                 // 计算该route连接池中的连接数 是否 大于等于 route最大连接数
                 // Shrink the pool prior to allocating a new connection
-                final int excess = Math.max(0, routerPool.getAllocatedCount() + 1 - maxPerRoute);
+                final int excess = Math.max(0, specificPool.getAllocatedCount() + 1 - maxPerRoute);
                 if (excess > 0) {
                     for (int i = 0; i < excess; i++) {
-                        final E lastUsed = routerPool.getLastUsed();
+                        final E lastUsed = specificPool.getLastUsed();
                         if (lastUsed == null) {
                             break;
                         }
                         lastUsed.close();
                         this.available.remove(lastUsed);
-                        routerPool.remove(lastUsed);
+                        specificPool.remove(lastUsed);
                     }
                 }
 
                 // 该route的连接池大小 小于 route最大连接数
-                if (routerPool.getAllocatedCount() < maxPerRoute) {
+                if (specificPool.getAllocatedCount() < maxPerRoute) {
 
                     final int totalUsed = this.leased.size();
                     final int freeCapacity = Math.max(this.maxTotal - totalUsed, 0);
@@ -503,32 +534,34 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                         // 创建新连接，并添加到总的leased集合以及route连接池的leased集合中，函数返回
                         final C conn = this.connFactory.create(route);
                         // 添加到entity中
-                        entry = routerPool.add(conn);
+                        entry = specificPool.add(conn);
                         this.leased.add(entry);
                         // 返回
                         return entry;
                     }
                 }
 
-
+                // 走到这里说明无可用连接，总连接数満了，或者达到了路由最大连接数，
+                // 这里候线程挂起，如果配置的有超时，等待超时唤醒，或者正常唤醒，然后继续下轮连接获取
+                // 连接释放连接回连接池的时候，会唤醒这些阻塞线程，否则就是超时了或者出现中
                 //route的连接池已满，无法分配连接
                 boolean success = false;
 
                 try {
                     // 将该获取连接的任务放入pending队列
-                    routerPool.queue(future);
+                    specificPool.queue(future);
                     this.pending.add(future);
 
                     if (deadline != null) {
-                        System.out.println(Thread.currentThread().getName() + " 开始休眠1 future = " + future);
+                        log.info("开始休眠1 future = " + future);
                         // 阻塞等待，若在超时之前被唤醒，则返回true；若直到超时才返回，则返回false
                         success = this.condition.awaitUntil(deadline);
-                        System.out.println(Thread.currentThread().getName() + " 结束休眠1 future = " + future);
+                        log.info("结束休眠1 future = " + future);
                     } else {
-                        System.out.println(Thread.currentThread().getName() + " 开始休眠2 future = " + future);
+                        log.info("开始休眠2 future = " + future);
                         this.condition.await();
                         success = true;
-                        System.out.println(Thread.currentThread().getName() + " 结束休眠2 future = " + future);
+                        log.info("结束休眠2 future = " + future);
                     }
 
                     if (future.isCancelled()) {
@@ -541,7 +574,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                     // Just continue in the loop, both cases are checked.
                     // 无论是 被唤醒返回、超时返回 还是被 中断异常返回，都会进入finally代码段
                     // 从pending队列中移除
-                    routerPool.unqueue(future);
+                    specificPool.unqueue(future);
                     this.pending.remove(future);
                 }
 
@@ -550,7 +583,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                 // 若是 伪唤醒，则继续循环获取连接
                 // check for spurious wakeup vs. timeout
                 if (!success && (deadline != null && deadline.getTime() <= System.currentTimeMillis())) {
-                    System.out.println(Thread.currentThread().getName() + " 唤醒超时抛异常  break future = " + future);
+                    log.info("唤醒超时抛异常  break future = " + future);
                     // break 就执行到 throw exception了
                     break;
                 }
@@ -566,17 +599,18 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
     }
 
     /**
-     *
+     * 本方法和上一个方法getPoolEntryBlocking() 互为排斥共用一把锁
      */
     @Override
     public void release(final E entry, final boolean reusable) {
+        // 加锁， finally代码块中释放锁
         this.lock.lock();
         try {
-
-            System.out.println(Thread.currentThread().getName() + " release entry = " + entry);
+            boolean remove = this.leased.remove(entry);
+            log.info("释放 release entry = " + entry + "  reusable= " + reusable  + "  remove= " + remove);
             // 从总的leased集合中移除连接
-            if (this.leased.remove(entry)) {
-
+            if (remove) {
+                //
                 final RouteSpecificPool<T, C, E> pool = getPool(entry.getRoute());
                 // 回收连接
                 pool.free(entry, reusable);
@@ -584,9 +618,11 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                 if (reusable && !this.isShutDown) {
                     this.available.addFirst(entry);
                 } else {
+                    // 就是把底层的socket close掉，对应的输入输出流close掉
                     entry.close();
                 }
 
+                // protected方法 空实现，留给子类扩展，但是子类并没有重写扩展
                 onRelease(entry);
 
                 // 获取pending队列队头的任务（先进先出原则），唤醒该阻塞的任务
@@ -598,7 +634,7 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
                 }
 
                 if (future != null) {
-                    System.out.println(Thread.currentThread().getName() + " 唤醒 所有 future = " + future);
+                    log.info("唤醒 所有 future = " + future);
                     // 唤醒pending中的future
                     this.condition.signalAll();
                 }
@@ -685,11 +721,8 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
     public PoolStats getTotalStats() {
         this.lock.lock();
         try {
-            return new PoolStats(
-                    this.leased.size(),
-                    this.pending.size(),
-                    this.available.size(),
-                    this.maxTotal);
+            PoolStats poolStats = new PoolStats(this.leased.size(), this.pending.size(), this.available.size(), this.maxTotal);
+            return poolStats;
         } finally {
             this.lock.unlock();
         }
@@ -701,11 +734,8 @@ public abstract class AbstractConnPool<T, C, E extends PoolEntry<T, C>>
         this.lock.lock();
         try {
             final RouteSpecificPool<T, C, E> pool = getPool(route);
-            return new PoolStats(
-                    pool.getLeasedCount(),
-                    pool.getPendingCount(),
-                    pool.getAvailableCount(),
-                    getMax(route));
+            int max = getMax(route);
+            return new PoolStats(pool.getLeasedCount(), pool.getPendingCount(), pool.getAvailableCount(), max);
         } finally {
             this.lock.unlock();
         }
